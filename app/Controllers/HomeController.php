@@ -1,31 +1,36 @@
 <?php
 
 class HomeController extends Controller {
-    
+
     public function index() {
-        // 1. Siapkan data yang mau dikirim ke View (dan diteruskan ke Template)
+        $roomModel     = $this->model('Room');
+        $kosModel      = $this->model('Kos');
+        $facilityModel = $this->model('Facility');
+        $bookingModel  = $this->model('Booking');
+
         $data = [
-            'title' => 'Dashboard Kosan',
-            
-            // Format breadcrumbs baru menyesuaikan template.php
+            'title'       => 'Dashboard Kosan',
             'breadcrumbs' => [
-                [
-                    'label' => 'Home', 
-                    'url' => BASEURL
-                ],
-                [
-                    'label' => 'Dashboard', 
-                    'url' => '' // Kosongkan URL untuk halaman yang sedang aktif
-                ]
+                ['label' => 'Home',      'url' => BASEURL],
+                ['label' => 'Dashboard', 'url' => '']
             ],
-            
-            // (Opsional) Jika nanti di dashboard butuh script JS khusus atau modal
-            // 'scripts' => '<script src="..."></script>',
-            // 'modal' => '<div>...</div>'
+
+            // Stat cards
+            'total_kos'        => $kosModel->countKos(),
+            'total_kamar'      => $roomModel->countRooms(),
+            'kamar_terisi'     => $roomModel->countByStatus('terisi'),
+            'kamar_kosong'     => $roomModel->countByStatus('kosong'),
+            'total_fasilitas'  => $facilityModel->countFacilities(),
+
+            // Booking stats
+            'total_booking'    => $bookingModel->countBookings(),
+            'booking_pending'  => $bookingModel->countByStatus('pending'),
+            'booking_confirmed'=> $bookingModel->countByStatus('confirmed'),
+
+            // Tabel kamar terbaru
+            'recent_rooms'     => $roomModel->getRecentRooms(5),
         ];
 
-        // 2. Panggil file view-nya secara langsung!
-        // Ini akan memanggil file: views/dashboard/dashboard.php
         $this->view('dashboard/dashboard', $data);
     }
 }

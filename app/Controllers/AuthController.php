@@ -5,7 +5,7 @@ class AuthController extends Controller {
     public function index() {
         // Jika sudah login, arahkan ke dashboard
         if (isset($_SESSION['user'])) {
-            header('Location: ' . BASEURL . '/home');
+            header('Location: ' . BASEURL . '/katalog');
             exit;
         }
 
@@ -36,8 +36,12 @@ class AuthController extends Controller {
                         'role' => $user['role']
                     ];
 
-                    // Redirect berdasarkan role atau langsung ke dashboard
-                    header('Location: ' . BASEURL . '/home');
+                    // Redirect berdasarkan role
+                    if ($user['role'] === 'admin') {
+                        header('Location: ' . BASEURL . '/home');
+                    } else {
+                        header('Location: ' . BASEURL . '/katalog');
+                    }
                     exit;
                 } else {
                     // Password salah

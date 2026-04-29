@@ -5,7 +5,7 @@ date_default_timezone_set('Asia/Jakarta');
 require_once '../config/koneksi.php';
 require_once '../app/Core/Database.php';
 require_once '../app/Core/Controller.php';
-$url = isset($_GET['url']) ? rtrim($_GET['url'], '/') : 'home/index';
+$url = isset($_GET['url']) ? rtrim($_GET['url'], '/') : 'katalog/index';
 $url = filter_var($url, FILTER_SANITIZE_URL);
 $url = explode('/', $url);
 

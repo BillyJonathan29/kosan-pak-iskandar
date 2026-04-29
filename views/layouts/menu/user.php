@@ -5,6 +5,10 @@
         <div class="sb-nav-link-icon"><i class="fas fa-home"></i></div>
         Dashboard
     </a>
+    <a class="nav-link" href="<?= BASEURL ?>/katalog">
+        <div class="sb-nav-link-icon"><i class="fas fa-th-large"></i></div>
+        Katalog Kamar
+    </a>
 
     <div class="sb-sidenav-menu-heading">Menu Saya</div>
     <a class="nav-link" href="<?= BASEURL ?>/kamar">
