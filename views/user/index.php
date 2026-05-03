@@ -27,7 +27,13 @@
                     <?php $no = 1; foreach ($users as $user) : ?>
                     <tr>
                         <td><?= $no++; ?></td>
-                        <td><?= htmlspecialchars($user['name']); ?></td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <img src="<?= !empty($user['profile_image']) ? BASEURL . '/assets/img/profile/' . $user['profile_image'] : BASEURL . '/assets/img/default-avatar.jpg'; ?>" 
+                                    class="rounded-circle me-2" width="35" height="35" style="object-fit: cover;">
+                                <?= htmlspecialchars($user['name']); ?>
+                            </div>
+                        </td>
                         <td><?= htmlspecialchars($user['email']); ?></td>
                         <td><?= htmlspecialchars($user['phone']); ?></td>
                         <td>

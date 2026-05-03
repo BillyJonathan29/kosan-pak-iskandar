@@ -30,12 +30,13 @@ class UserController extends Controller {
 
     public function store() {
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-            if ($this->model('User')->addUser($_POST) > 0) {
-                // Flasher::setFlash('berhasil', 'ditambahkan', 'success');
+            $data = $_POST;
+            $data['profile_image'] = $this->uploadImage();
+
+            if ($this->model('User')->addUser($data) > 0) {
                 header('Location: ' . BASEURL . '/user');
                 exit;
             } else {
-                // Flasher::setFlash('gagal', 'ditambahkan', 'danger');
                 header('Location: ' . BASEURL . '/user');
                 exit;
             }
@@ -58,7 +59,14 @@ class UserController extends Controller {
 
     public function update() {
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-            if ($this->model('User')->updateUser($_POST) > 0) {
+            $data = $_POST;
+            
+            $image = $this->uploadImage();
+            if ($image) {
+                $data['profile_image'] = $image;
+            }
+
+            if ($this->model('User')->updateUser($data) > 0) {
                 header('Location: ' . BASEURL . '/user');
                 exit;
             } else {
@@ -66,6 +74,41 @@ class UserController extends Controller {
                 exit;
             }
         }
+    }
+
+    private function uploadImage() {
+        if (isset($_FILES['profile_image']) && $_FILES['profile_image']['error'] == 0) {
+            $namaFile = $_FILES['profile_image']['name'];
+            $ukuranFile = $_FILES['profile_image']['size'];
+            $error = $_FILES['profile_image']['error'];
+            $tmpName = $_FILES['profile_image']['tmp_name'];
+
+            $ekstensiGambarValid = ['jpg', 'jpeg', 'png'];
+            $ekstensiGambar = explode('.', $namaFile);
+            $ekstensiGambar = strtolower(end($ekstensiGambar));
+
+            if (!in_array($ekstensiGambar, $ekstensiGambarValid)) {
+                return null;
+            }
+
+            if ($ukuranFile > 2000000) {
+                return null;
+            }
+
+            $namaFileBaru = uniqid();
+            $namaFileBaru .= '.';
+            $namaFileBaru .= $ekstensiGambar;
+
+            $targetDir = 'assets/img/profile/';
+            if (!is_dir($targetDir)) {
+                mkdir($targetDir, 0777, true);
+            }
+
+            move_uploaded_file($tmpName, $targetDir . $namaFileBaru);
+
+            return $namaFileBaru;
+        }
+        return null;
     }
 
     public function delete($id) {

@@ -61,13 +61,25 @@ class Katalog {
         $stmt->bindParam(':booking_date', $data['booking_date']);
         $stmt->bindParam(':duration',     $data['duration'],     PDO::PARAM_INT);
         $stmt->bindParam(':total_price',  $data['total_price']);
-        return $stmt->execute();
+        
+        if ($stmt->execute()) {
+            return $this->conn->lastInsertId();
+        }
+        return false;
     }
 
     // ─── UPDATE status kamar menjadi 'booked' setelah booking berhasil ────────
     public function updateRoomStatusBooked($room_id) {
         $stmt = $this->conn->prepare(
             "UPDATE rooms SET status = 'booked' WHERE id = :id"
+        );
+        $stmt->bindParam(':id', $room_id, PDO::PARAM_INT);
+        return $stmt->execute();
+    }
+
+    public function updateRoomStatusOccupied($room_id) {
+        $stmt = $this->conn->prepare(
+            "UPDATE rooms SET status = 'occupied' WHERE id = :id"
         );
         $stmt->bindParam(':id', $room_id, PDO::PARAM_INT);
         return $stmt->execute();

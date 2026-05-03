@@ -37,9 +37,12 @@ if (!isset($_SESSION['user'])) {
 
                 <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
                     <li class="text-center px-1">
+                        <?php 
+                            $avatar = !empty($_SESSION['user']['profile_image']) ? BASEURL . '/assets/img/profile/' . $_SESSION['user']['profile_image'] : BASEURL . '/assets/img/default-avatar.jpg';
+                        ?>
                         <img class="img-account-profile rounded-circle mb-2 mt-2"
-                            src="https://ui-avatars.com/api/?name=<?= urlencode($_SESSION['user']['name'] ?? 'User') ?>&background=random&size=150"
-                            alt="Avatar" style="width: 80px; height: 80px;">
+                            src="<?= $avatar ?>"
+                            alt="Avatar" style="width: 80px; height: 80px; object-fit: cover;">
 
                         <h6 class="mb-0">
                             <?= $_SESSION['user']['name'] ?? 'Guest'; ?>

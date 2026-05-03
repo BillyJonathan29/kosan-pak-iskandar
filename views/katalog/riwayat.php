@@ -68,8 +68,13 @@
                                     </div>
                                     
                                     <?php if ($b['status'] === 'pending') : ?>
-                                        <div class="mt-4 p-2 bg-light rounded text-center small text-muted italic">
-                                            <i class="fas fa-clock me-1"></i> Menunggu konfirmasi pembayaran oleh admin.
+                                        <div class="mt-4 d-flex align-items-center justify-content-between p-3 bg-primary bg-opacity-10 rounded-3 border border-primary border-opacity-25">
+                                            <div class="small text-primary fw-medium">
+                                                <i class="fas fa-info-circle me-1"></i> Segera selesaikan pembayaran Anda agar pesanan dapat dikonfirmasi.
+                                            </div>
+                                            <a href="<?= BASEURL ?>/payment/pay/<?= $b['id'] ?>" class="btn btn-primary btn-sm px-4 rounded-pill fw-bold">
+                                                <i class="fas fa-credit-card me-1"></i> Bayar Sekarang
+                                            </a>
                                         </div>
                                     <?php endif; ?>
                                 </div>

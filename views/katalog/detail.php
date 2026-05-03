@@ -1,38 +1,54 @@
 <?php ob_start(); ?>
 
-<div class="container py-5">
+<div class="container py-5" style="margin-top: 50px;">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4 animate__animated animate__fadeIn">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="<?= BASEURL ?>" class="text-decoration-none text-muted">Beranda</a></li>
+            <li class="breadcrumb-item"><a href="<?= BASEURL ?>#katalog" class="text-decoration-none text-muted">Katalog</a></li>
+            <li class="breadcrumb-item active fw-bold text-primary" aria-current="page">Detail Kamar</li>
+        </ol>
+    </nav>
+
     <div class="row g-5">
-        <!-- Bagian Kiri: Foto Kamar -->
-        <div class="col-lg-7">
+        <!-- Bagian Kiri: Foto Kamar & Fasilitas -->
+        <div class="col-lg-8 animate__animated animate__fadeInLeft">
             <?php
             $imgSrc = !empty($room['image'])
                 ? BASEURL . '/assets/img/rooms/' . $room['image']
-                : 'https://placehold.co/1200x800/e9ecef/6c757d?text=No+Image';
+                : 'https://images.unsplash.com/photo-1598928506311-c55ded91a20c?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80';
             ?>
-            <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
-                <img src="<?= $imgSrc ?>" class="img-fluid w-100" alt="Kamar <?= htmlspecialchars($room['room_number']) ?>" style="min-height: 400px; object-fit: cover;">
-                <div class="card-img-overlay d-flex align-items-start justify-content-end">
-                    <span class="badge bg-success px-3 py-2 shadow-sm">
-                        <i class="fas fa-check-circle me-1"></i> Tersedia
-                    </span>
+            <div class="card border-0 shadow-sm rounded-5 overflow-hidden mb-5">
+                <div class="position-relative">
+                    <img src="<?= $imgSrc ?>" class="img-fluid w-100" alt="Kamar <?= htmlspecialchars($room['room_number']) ?>" style="height: 500px; object-fit: cover;">
+                    <div class="position-absolute top-0 end-0 m-4">
+                        <span class="badge bg-success px-4 py-2 rounded-pill shadow-lg fw-bold">
+                            <i class="fas fa-check-circle me-1"></i> Tersedia Sekarang
+                        </span>
+                    </div>
                 </div>
             </div>
 
-            <div class="mt-4">
-                <h3 class="fw-bold text-dark mb-3">Fasilitas Kamar</h3>
-                <div class="row g-3">
+            <div class="mb-5">
+                <h3 class="fw-800 mb-4 d-flex align-items-center">
+                    <i class="fas fa-sparkles text-warning me-3"></i> Fasilitas Kamar Eksklusif
+                </h3>
+                <div class="row g-4">
                     <?php if (empty($facilities)): ?>
                         <div class="col-12">
-                            <p class="text-muted italic">Tidak ada fasilitas spesifik yang dicantumkan.</p>
+                            <div class="alert alert-light border rounded-4 p-4 text-center">
+                                <i class="fas fa-info-circle text-muted mb-2 fs-3"></i>
+                                <p class="text-muted mb-0">Informasi fasilitas lengkap dapat ditanyakan langsung ke admin.</p>
+                            </div>
                         </div>
                     <?php else: ?>
                         <?php foreach ($facilities as $f): ?>
-                            <div class="col-md-4">
-                                <div class="d-flex align-items-center p-3 bg-white border rounded-3 shadow-sm">
-                                    <div class="flex-shrink-0 bg-primary bg-opacity-10 text-primary p-2 rounded-2 me-3">
-                                        <i class="<?= $f['icon'] ?? 'fas fa-check' ?> fa-lg"></i>
+                            <div class="col-md-4 col-6">
+                                <div class="d-flex align-items-center p-3 bg-white border border-light-subtle rounded-4 shadow-sm hover-lift h-100">
+                                    <div class="flex-shrink-0 bg-primary-subtle text-primary p-3 rounded-4 me-3">
+                                        <i class="<?= $f['icon'] ?? 'fas fa-check' ?> fs-5"></i>
                                     </div>
-                                    <div class="fw-medium text-dark small"><?= htmlspecialchars($f['facility_name']) ?></div>
+                                    <div class="fw-bold text-dark"><?= htmlspecialchars($f['facility_name']) ?></div>
                                 </div>
                             </div>
                         <?php endforeach; ?>
@@ -40,76 +56,130 @@
                 </div>
             </div>
 
-            <div class="mt-5">
-                <h3 class="fw-bold text-dark mb-3">Deskripsi & Aturan</h3>
-                <div class="bg-light p-4 rounded-4 border-start border-primary border-4 shadow-sm">
-                    <p class="mb-0 text-secondary leading-relaxed">
-                        <?= !empty($room['description']) ? nl2br(htmlspecialchars($room['description'])) : 'Silakan hubungi pemilik kos untuk informasi lebih lanjut mengenai detail kamar ini.' ?>
+            <div class="mb-5">
+                <h3 class="fw-800 mb-4 d-flex align-items-center">
+                    <i class="fas fa-file-alt text-primary me-3"></i> Deskripsi Kamar
+                </h3>
+                <div class="bg-white p-4 rounded-5 shadow-sm border-start border-primary border-5">
+                    <p class="mb-0 text-muted fs-5 lh-lg">
+                        <?= !empty($room['description']) ? nl2br(htmlspecialchars($room['description'])) : 'Kamar ini didesain khusus untuk memberikan kenyamanan maksimal bagi penghuninya. Terletak di area yang tenang dengan sirkulasi udara yang baik.' ?>
                     </p>
+                </div>
+            </div>
+            
+            <div class="mb-5">
+                <h3 class="fw-800 mb-4 d-flex align-items-center">
+                    <i class="fas fa-shield-halved text-success me-3"></i> Aturan Kos
+                </h3>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <ul class="list-group list-group-flush bg-transparent">
+                            <li class="list-group-item bg-transparent border-0 px-0 d-flex align-items-center text-muted">
+                                <i class="fas fa-check-circle text-success me-3"></i> Tamu menginap lapor admin
+                            </li>
+                            <li class="list-group-item bg-transparent border-0 px-0 d-flex align-items-center text-muted">
+                                <i class="fas fa-check-circle text-success me-3"></i> Dilarang membawa hewan peliharaan
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <ul class="list-group list-group-flush bg-transparent">
+                            <li class="list-group-item bg-transparent border-0 px-0 d-flex align-items-center text-muted">
+                                <i class="fas fa-check-circle text-success me-3"></i> Menjaga ketenangan di atas jam 10 malam
+                            </li>
+                            <li class="list-group-item bg-transparent border-0 px-0 d-flex align-items-center text-muted">
+                                <i class="fas fa-check-circle text-success me-3"></i> Kebersihan adalah tanggung jawab bersama
+                            </li>
+                        </ul>
+                    </div>
                 </div>
             </div>
         </div>
 
         <!-- Bagian Kanan: Detail & Form Booking -->
-        <div class="col-lg-5">
-            <div class="sticky-top" style="top: 100px;">
-                <div class="card border-0 shadow-lg rounded-4 overflow-hidden mb-4">
-                    <div class="card-header bg-dark text-white py-3">
-                        <h5 class="mb-0 fw-bold">Detail Kos</h5>
-                    </div>
+        <div class="col-lg-4 animate__animated animate__fadeInRight">
+            <div class="sticky-top" style="top: 120px;">
+                <div class="card border-0 shadow-lg rounded-5 overflow-hidden mb-4">
                     <div class="card-body p-4">
-                        <h4 class="fw-bold text-primary mb-1"><?= htmlspecialchars($room['kos_name']) ?></h4>
-                        <p class="text-muted small mb-3">
-                            <i class="fas fa-map-marker-alt text-danger me-1"></i> <?= htmlspecialchars($room['kos_address']) ?>
-                        </p>
-
-                        <hr>
-
-                        <div class="d-flex justify-content-between align-items-center mb-2">
-                            <span class="text-secondary">Nomor Kamar</span>
-                            <span class="badge bg-light text-dark border px-3 py-2 fw-bold"><?= htmlspecialchars($room['room_number']) ?></span>
-                        </div>
                         <div class="d-flex justify-content-between align-items-center mb-4">
-                            <span class="text-secondary">Harga Sewa</span>
-                            <span class="h4 mb-0 fw-bold text-success">Rp <?= number_format($room['price'], 0, ',', '.') ?><small class="text-muted fs-6 fw-normal">/bln</small></span>
-                        </div>
-
-                        <div class="bg-primary bg-opacity-10 p-3 rounded-3 mb-4 border border-primary border-opacity-25">
-                            <div class="d-flex align-items-center text-primary">
-                                <i class="fas fa-info-circle me-2"></i>
-                                <span class="small fw-semibold">Sudah termasuk biaya listrik dasar dan air.</span>
+                            <div>
+                                <h6 class="text-uppercase text-primary fw-bold small mb-1 ls-1">Kamar Nomor</h6>
+                                <h3 class="fw-800 mb-0"><?= htmlspecialchars($room['room_number']) ?></h3>
+                            </div>
+                            <div class="text-end">
+                                <h6 class="text-uppercase text-muted fw-bold small mb-1 ls-1">Harga Sewa</h6>
+                                <h3 class="fw-800 text-success mb-0">Rp <?= number_format($room['price'], 0, ',', '.') ?></h3>
+                                <small class="text-muted">/ bulan</small>
                             </div>
                         </div>
 
-                        <form action="<?= BASEURL ?>/katalog/booking" method="POST">
-                            <input type="hidden" name="room_id" value="<?= $room['id'] ?>">
-                            
-                            <div class="mb-3">
-                                <label class="form-label fw-bold text-dark">Durasi Sewa (Bulan)</label>
-                                <div class="input-group">
-                                    <span class="input-group-text bg-white"><i class="fas fa-calendar-alt text-muted"></i></span>
-                                    <input type="number" name="duration" class="form-control" value="1" min="1" max="12" required>
-                                    <span class="input-group-text bg-white">Bulan</span>
+                        <hr class="my-4 opacity-50">
+
+                        <div class="mb-4">
+                            <div class="d-flex align-items-start gap-3 mb-3">
+                                <i class="fas fa-building text-primary mt-1"></i>
+                                <div>
+                                    <div class="fw-bold text-dark"><?= htmlspecialchars($room['kos_name']) ?></div>
+                                    <div class="text-muted small"><?= htmlspecialchars($room['kos_address']) ?></div>
                                 </div>
-                                <div class="form-text mt-2 small">Minimum sewa 1 bulan.</div>
                             </div>
+                            <div class="d-flex align-items-center gap-3">
+                                <i class="fas fa-bolt text-warning"></i>
+                                <span class="text-muted small">Sudah termasuk Listrik & Air</span>
+                            </div>
+                        </div>
 
-                            <button type="submit" class="btn btn-primary btn-lg w-100 fw-bold shadow-sm py-3" style="border-radius: 12px;">
-                                <i class="fas fa-bolt me-2"></i> Booking Sekarang
-                            </button>
-                        </form>
+                        <?php if (isset($_SESSION['user'])): ?>
+                            <form action="<?= BASEURL ?>/katalog/booking" method="POST">
+                                <input type="hidden" name="room_id" value="<?= $room['id'] ?>">
+                                
+                                <div class="mb-4">
+                                    <label class="form-label fw-bold text-dark">Berapa lama Anda akan menyewa?</label>
+                                    <div class="input-group input-group-lg overflow-hidden rounded-4 border">
+                                        <span class="input-group-text bg-white border-0"><i class="fas fa-calendar-days text-primary"></i></span>
+                                        <input type="number" name="duration" class="form-control border-0 shadow-none fs-6" value="1" min="1" max="12" required>
+                                        <span class="input-group-text bg-white border-0 fw-bold">Bulan</span>
+                                    </div>
+                                    <div class="form-text mt-2 small text-muted"><i class="fas fa-info-circle me-1"></i> Minimum sewa adalah 1 bulan.</div>
+                                </div>
+
+                                <button type="submit" class="btn btn-primary-custom btn-lg w-100 py-3 shadow-lg mb-3">
+                                    Booking Sekarang
+                                </button>
+                            </form>
+                        <?php else: ?>
+                            <div class="alert alert-info border-0 rounded-4 p-4 mb-4">
+                                <div class="d-flex gap-3">
+                                    <i class="fas fa-user-lock fs-4"></i>
+                                    <div>
+                                        <div class="fw-bold mb-1">Ingin Booking?</div>
+                                        <div class="small mb-3">Silakan masuk atau daftar akun terlebih dahulu untuk melanjutkan pemesanan.</div>
+                                        <a href="<?= BASEURL ?>/auth" class="btn btn-primary btn-sm rounded-pill px-4">Masuk Sekarang</a>
+                                    </div>
+                                </div>
+                            </div>
+                        <?php endif; ?>
+
+                        <div class="text-center">
+                            <span class="text-muted small">Butuh bantuan?</span>
+                            <a href="https://wa.me/6281234567890" class="text-primary fw-bold text-decoration-none ms-1">Tanya Admin</a>
+                        </div>
                     </div>
                 </div>
 
-                <div class="card border-0 shadow-sm rounded-4 bg-light p-3">
+                <!-- Card Host -->
+                <div class="card border-0 shadow-sm rounded-5 bg-white p-4">
                     <div class="d-flex align-items-center">
-                        <img src="https://ui-avatars.com/api/?name=Admin+Iskandar&background=0D6EFD&color=fff" class="rounded-circle me-3" width="48">
-                        <div>
-                            <h6 class="mb-0 fw-bold">Hubungi Pemilik</h6>
-                            <small class="text-muted"><?= htmlspecialchars($room['kos_phone'] ?? '08xx-xxxx-xxxx') ?></small>
+                        <div class="position-relative">
+                            <img src="https://ui-avatars.com/api/?name=Admin+Iskandar&background=4361ee&color=fff" class="rounded-circle me-3" width="60" height="60">
+                            <span class="position-absolute bottom-0 end-0 bg-success border border-white border-2 rounded-circle p-1" style="width: 15px; height: 15px; transform: translate(-10px, -2px);"></span>
                         </div>
-                        <a href="https://wa.me/<?= str_replace(['-', ' ', '+'], '', $room['phone'] ?? '') ?>" class="btn btn-success btn-sm ms-auto rounded-pill px-3">
-                            <i class="fab fa-whatsapp"></i> Chat
+                        <div>
+                            <h6 class="mb-0 fw-800">Pak Iskandar</h6>
+                            <small class="text-muted">Pemilik Kos (Online)</small>
+                        </div>
+                        <a href="https://wa.me/6281234567890" class="btn btn-success-subtle text-success rounded-circle ms-auto p-3 shadow-none">
+                            <i class="fab fa-whatsapp fs-4"></i>
                         </a>
                     </div>
                 </div>
@@ -120,5 +190,25 @@
 
 <?php
 $content = ob_get_clean();
-require_once __DIR__ . '/../layouts/template.php';
+
+ob_start();
+?>
+<style>
+    .fw-800 { font-weight: 800; }
+    .ls-1 { letter-spacing: 1px; }
+    .btn-success-subtle {
+        background-color: #d1e7dd;
+        border: none;
+        transition: all 0.3s;
+    }
+    .btn-success-subtle:hover {
+        background-color: #198754;
+        color: white !important;
+        transform: rotate(15deg);
+    }
+</style>
+<?php
+$scripts = ob_get_clean();
+
+require_once __DIR__ . '/../layouts/landing.php';
 ?>

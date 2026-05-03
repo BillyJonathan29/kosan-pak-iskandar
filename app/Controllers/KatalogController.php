@@ -12,7 +12,7 @@ class KatalogController extends Controller {
 
     // ─── 1. Halaman Katalog Kamar ─────────────────────────────────────────────
     public function index() {
-        $this->requireLogin();
+        // Halaman ini bisa diakses publik (landing page)
 
         $data = [
             'title'       => 'Katalog Kamar',
@@ -29,7 +29,7 @@ class KatalogController extends Controller {
 
     // ─── 2. Halaman Detail Kamar ──────────────────────────────────────────────
     public function detail($id) {
-        $this->requireLogin();
+        // Detail kamar juga bisa diakses publik
 
         $room = $this->model('Katalog')->getRoomDetail($id);
 
@@ -88,12 +88,13 @@ class KatalogController extends Controller {
         $katalogModel = $this->model('Katalog');
 
         // INSERT ke tabel bookings
-        if ($katalogModel->createBooking($bookingData)) {
+        $bookingId = $katalogModel->createBooking($bookingData);
+        if ($bookingId) {
             // UPDATE status kamar menjadi 'booked'
             $katalogModel->updateRoomStatusBooked($room_id);
 
-            // Redirect ke riwayat pesanan
-            header('Location: ' . BASEURL . '/katalog/riwayat');
+            // Redirect ke halaman pembayaran
+            header('Location: ' . BASEURL . '/payment/pay/' . $bookingId);
             exit;
         }
 

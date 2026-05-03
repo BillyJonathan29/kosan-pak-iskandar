@@ -3,6 +3,16 @@
 class HomeController extends Controller {
 
     public function index() {
+        if (!isset($_SESSION['user'])) {
+            header('Location: ' . BASEURL . '/auth');
+            exit;
+        }
+
+        if ($_SESSION['user']['role'] !== 'admin') {
+            header('Location: ' . BASEURL . '/katalog');
+            exit;
+        }
+
         $roomModel     = $this->model('Room');
         $kosModel      = $this->model('Kos');
         $facilityModel = $this->model('Facility');

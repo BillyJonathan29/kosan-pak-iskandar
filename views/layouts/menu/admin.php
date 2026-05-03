@@ -5,10 +5,6 @@
         <div class="sb-nav-link-icon"><i class="fas fa-tachometer-alt"></i></div>
         Dashboard
     </a>
-    <a class="nav-link" href="<?= BASEURL ?>/katalog">
-        <div class="sb-nav-link-icon"><i class="fas fa-th-large"></i></div>
-        Katalog Kamar
-    </a>
 
     <div class="sb-sidenav-menu-heading">Manajemen</div>
     <a class="nav-link" href="<?= BASEURL ?>/user">

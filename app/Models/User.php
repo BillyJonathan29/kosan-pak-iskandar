@@ -30,8 +30,8 @@ class User {
     }
 
     public function addUser($data) {
-        $query = "INSERT INTO users (name, email, password, phone, role) 
-                  VALUES (:name, :email, :password, :phone, :role)";
+        $query = "INSERT INTO users (name, email, password, phone, role, profile_image) 
+                  VALUES (:name, :email, :password, :phone, :role, :profile_image)";
         
         $stmt = $this->conn->prepare($query);
         
@@ -42,27 +42,27 @@ class User {
         $stmt->bindParam(':password', $password);
         $stmt->bindParam(':phone', $data['phone']);
         $stmt->bindParam(':role', $data['role']);
+        $stmt->bindParam(':profile_image', $data['profile_image']);
         
         return $stmt->execute();
     }
 
     public function updateUser($data) {
+        $query = "UPDATE users SET 
+                    name = :name, 
+                    email = :email, 
+                    phone = :phone, 
+                    role = :role";
+        
         if(!empty($data['password'])) {
-            $query = "UPDATE users SET 
-                        name = :name, 
-                        email = :email, 
-                        password = :password, 
-                        phone = :phone, 
-                        role = :role 
-                      WHERE id = :id";
-        } else {
-            $query = "UPDATE users SET 
-                        name = :name, 
-                        email = :email, 
-                        phone = :phone, 
-                        role = :role 
-                      WHERE id = :id";
+            $query .= ", password = :password";
         }
+
+        if(isset($data['profile_image'])) {
+            $query .= ", profile_image = :profile_image";
+        }
+
+        $query .= " WHERE id = :id";
         
         $stmt = $this->conn->prepare($query);
         
@@ -75,6 +75,10 @@ class User {
         if(!empty($data['password'])) {
             $password = password_hash($data['password'], PASSWORD_DEFAULT);
             $stmt->bindParam(':password', $password);
+        }
+
+        if(isset($data['profile_image'])) {
+            $stmt->bindParam(':profile_image', $data['profile_image']);
         }
         
         return $stmt->execute();

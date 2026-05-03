@@ -1,0 +1,13 @@
+{
+    "name": "billyjonathan29/kosan-pak-iskandar",
+    "description": "Aplikasi Booking Kos-kosan",
+    "require": {
+        "midtrans/midtrans-php": "^2.5",
+        "google/apiclient": "2.15"
+    },
+    "autoload": {
+        "psr-4": {
+            "App\\": "app/"
+        }
+    }
+}

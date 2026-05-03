@@ -3,18 +3,37 @@
 class BookingController extends Controller {
 
     public function index() {
+        if (!isset($_SESSION['user'])) {
+            header('Location: ' . BASEURL . '/auth');
+            exit;
+        }
+
+        $userId = $_SESSION['user']['id'];
+        $role = $_SESSION['user']['role'];
+
+        if ($role === 'admin') {
+            $bookings = $this->model('Booking')->getAllBookings();
+        } else {
+            $bookings = $this->model('Booking')->getBookingsByUserId($userId);
+        }
+
         $data = [
-            'title'       => 'Manajemen Booking',
+            'title'       => 'Data Booking Saya',
             'breadcrumbs' => [
                 ['label' => 'Home',    'url' => BASEURL],
                 ['label' => 'Booking', 'url' => '']
             ],
-            'bookings'  => $this->model('Booking')->getAllBookings(),
+            'bookings'  => $bookings,
             'users'     => $this->model('User')->getAllUsers(),
             'rooms'     => $this->model('Room')->getAllRooms(),
         ];
 
-        $this->view('booking/index', $data);
+        if ($role === 'admin') {
+            $data['title'] = 'Manajemen Booking';
+            $this->view('booking/index', $data);
+        } else {
+            $this->view('booking/user_index', $data);
+        }
     }
 
     public function store() {

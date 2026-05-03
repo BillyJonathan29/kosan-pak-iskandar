@@ -9,9 +9,19 @@
                     Form Edit User
                 </div>
                 <div class="card-body">
-                    <form action="<?= BASEURL; ?>/user/update" method="post">
+                    <form action="<?= BASEURL; ?>/user/update" method="post" enctype="multipart/form-data">
                         <input type="hidden" name="id" value="<?= $user['id']; ?>">
                         
+                        <div class="mb-3 text-center">
+                            <?php 
+                                $image = !empty($user['profile_image']) ? BASEURL . '/assets/img/profile/' . $user['profile_image'] : BASEURL . '/assets/img/default-avatar.jpg';
+                            ?>
+                            <img src="<?= $image; ?>" class="rounded-circle mb-2" width="100" height="100" id="img-preview" style="object-fit: cover;">
+                            <br>
+                            <label for="profile_image" class="form-label">Foto Profil</label>
+                            <input type="file" class="form-control" id="profile_image" name="profile_image" onchange="previewImage()">
+                        </div>
+
                         <div class="mb-3">
                             <label for="name" class="form-label">Nama Lengkap</label>
                             <input type="text" class="form-control" id="name" name="name" value="<?= htmlspecialchars($user['name']); ?>" required autocomplete="off">
@@ -47,6 +57,20 @@
 </div>
 
 <?php 
+$scripts = '
+<script>
+    function previewImage() {
+        const image = document.querySelector("#profile_image");
+        const imgPreview = document.querySelector("#img-preview");
+
+        const oFReader = new FileReader();
+        oFReader.readAsDataURL(image.files[0]);
+
+        oFReader.onload = function(oFREvent) {
+            imgPreview.src = oFREvent.target.result;
+        }
+    }
+</script>';
 $content = ob_get_clean(); 
 require_once __DIR__ . '/../layouts/template.php'; 
 ?>
