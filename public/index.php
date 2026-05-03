@@ -1,11 +1,17 @@
 <?php
+require_once '../vendor/autoload.php';
 session_start();
 date_default_timezone_set('Asia/Jakarta');
 
+
+$dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . '/../');
+$dotenv->load();
+
 require_once '../config/koneksi.php';
-require_once '../vendor/autoload.php';
 require_once '../app/Core/Database.php';
 require_once '../app/Core/Controller.php';
+
+// --- Sisanya tetap sama seperti sebelumnya ---
 $url = isset($_GET['url']) ? rtrim($_GET['url'], '/') : 'katalog/index';
 $url = filter_var($url, FILTER_SANITIZE_URL);
 $url = explode('/', $url);
