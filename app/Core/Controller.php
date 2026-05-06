@@ -17,7 +17,7 @@ class Controller
         }
     }
 
-    public function model($model)
+    public function     model($model)
     {
         if (file_exists('../app/Models/' . $model . '.php')) {
             require_once '../app/Models/' . $model . '.php';

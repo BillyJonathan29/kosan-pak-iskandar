@@ -103,9 +103,9 @@
                             <th>Order ID</th>
                             <th>Penyewa &amp; Kamar</th>
                             <th>Nominal</th>
-                            <th>Tagihan Ke-</th>
                             <th>Metode</th>
                             <th>Status</th>
+                            <th>Tgl. Bayar</th>
                             <th class="text-center" style="width: 110px;">Aksi</th>
                         </tr>
                     </thead>
@@ -146,14 +146,6 @@
                                 <?php /* Nominal */ ?>
                                 <td class="fw-semibold text-success">
                                     Rp <?= number_format($payment['amount'], 0, ',', '.') ?>
-                                </td>
-
-                                <?php /* Tagihan */ ?>
-                                <td>
-                                    <div class="fw-semibold text-dark">Bulan <?= $payment['billing_month'] ?? '1' ?></div>
-                                    <small class="text-muted">
-                                        JT: <?= !empty($payment['due_date']) ? date('d M Y', strtotime($payment['due_date'])) : '-' ?>
-                                    </small>
                                 </td>
 
                                 <?php /* Metode */ ?>
@@ -197,23 +189,24 @@
                                         <i class="fas <?= $icon ?> me-1"></i><?= $label ?>
                                     </span>
                                 </td>
+
+                                <?php /* Tanggal Bayar */ ?>
+                                <td class="small text-muted">
+                                    <?php if ($payment['paid_at']): ?>
+                                        <?= date('d M Y', strtotime($payment['paid_at'])) ?>
+                                        <br><span class="text-xs"><?= date('H:i', strtotime($payment['paid_at'])) ?> WIB</span>
+                                    <?php else: ?>
+                                        <span class="text-muted">—</span>
+                                    <?php endif; ?>
+                                </td>
+
                                 <?php /* Aksi */ ?>
                                 <td class="text-center">
-                                    <div class="d-flex justify-content-center gap-1">
-                                        <a href="<?= BASEURL ?>/transaction/detail/<?= $payment['id'] ?>"
-                                           class="btn btn-sm btn-outline-primary rounded-pill"
-                                           title="Lihat Detail Transaksi">
-                                            <i class="fas fa-eye"></i> Detail
-                                        </a>
-                                        
-                                        <?php if ($payment['payment_status'] !== 'paid'): ?>
-                                        <a href="<?= BASEURL ?>/transaction/checkStatus/<?= $payment['id'] ?>"
-                                           class="btn btn-sm btn-outline-success rounded-pill"
-                                           title="Cek Status ke Midtrans">
-                                            <i class="fas fa-sync-alt"></i> Cek
-                                        </a>
-                                        <?php endif; ?>
-                                    </div>
+                                    <a href="<?= BASEURL ?>/adminpayment/detail/<?= $payment['id'] ?>"
+                                       class="btn btn-sm btn-outline-primary rounded-pill"
+                                       title="Lihat Detail Transaksi">
+                                        <i class="fas fa-eye me-1"></i>Detail
+                                    </a>
                                 </td>
                             </tr>
                             <?php endforeach; ?>
@@ -244,5 +237,5 @@ $scripts = '<script>
 </script>';
 
 $content = ob_get_clean();
-require_once __DIR__ . '/../layouts/template.php';
+require_once __DIR__ . '/../../layouts/template.php';
 ?>

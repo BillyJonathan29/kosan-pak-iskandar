@@ -189,18 +189,21 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto align-items-center animate__animated animate__fadeInRight">
-                    <li class="nav-item">
-                        <a class="nav-link" href="<?= BASEURL ?>">Beranda</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#katalog">Katalog Kamar</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#fasilitas">Fasilitas</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#testimoni">Testimoni</a>
-                    </li>
+                    <?php if (isset($title) && $title === 'Katalog Kamar'): ?>
+                        <li class="nav-item">
+                            <a class="nav-link" href="<?= BASEURL ?>">Beranda</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#katalog">Katalog Kamar</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#fasilitas">Fasilitas</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#testimoni">Testimoni</a>
+                        </li>
+                    <?php endif; ?>
+                    
                     <?php if (isset($_SESSION['user'])): ?>
                         <li class="nav-item ms-lg-4">
                             <div class="dropdown">
@@ -212,6 +215,9 @@
                                     <?= explode(' ', $_SESSION['user']['name'])[0] ?>
                                 </a>
                                 <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-3 p-2" style="border-radius: 15px;">
+                                    <?php if (!isset($title) || $title !== 'Katalog Kamar'): ?>
+                                        <li><a class="dropdown-item py-2 rounded-3" href="<?= BASEURL ?>/katalog"><i class="fas fa-tachometer-alt me-2 text-primary"></i> Dashboard / Katalog</a></li>
+                                    <?php endif; ?>
                                     <li><a class="dropdown-item py-2 rounded-3" href="<?= BASEURL ?>/katalog"><i class="fas fa-search me-2 text-primary"></i> Cari Kamar</a></li>
                                     <li><a class="dropdown-item py-2 rounded-3" href="<?= BASEURL ?>/booking"><i class="fas fa-calendar-check me-2 text-primary"></i> Riwayat Booking</a></li>
                                     <li><a class="dropdown-item py-2 rounded-3" href="<?= BASEURL ?>/profile"><i class="fas fa-user-cog me-2 text-primary"></i> Profil Saya</a></li>

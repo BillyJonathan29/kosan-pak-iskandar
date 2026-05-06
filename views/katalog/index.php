@@ -87,9 +87,23 @@
                                 <img src="<?= $imgSrc ?>" alt="Kamar <?= htmlspecialchars($r['room_number']); ?>"
                                     class="w-100 h-100" style="object-fit: cover;">
                                 <div class="position-absolute top-0 end-0 m-3">
-                                    <span class="badge bg-success px-3 py-2 rounded-pill shadow-sm">
-                                        <i class="fas fa-circle me-1" style="font-size:8px;"></i> Tersedia
-                                    </span>
+                                    <?php if ($r['status'] === 'available'): ?>
+                                        <span class="badge bg-success px-3 py-2 rounded-pill shadow-sm">
+                                            <i class="fas fa-check-circle me-1" style="font-size:10px;"></i> Tersedia
+                                        </span>
+                                    <?php elseif ($r['status'] === 'booked'): ?>
+                                        <span class="badge bg-warning text-dark px-3 py-2 rounded-pill shadow-sm">
+                                            <i class="fas fa-clock me-1" style="font-size:10px;"></i> Dibooking
+                                        </span>
+                                    <?php elseif ($r['status'] === 'occupied'): ?>
+                                        <span class="badge bg-danger px-3 py-2 rounded-pill shadow-sm">
+                                            <i class="fas fa-times-circle me-1" style="font-size:10px;"></i> Terisi
+                                        </span>
+                                    <?php else: ?>
+                                        <span class="badge bg-secondary px-3 py-2 rounded-pill shadow-sm">
+                                            <i class="fas fa-circle me-1" style="font-size:10px;"></i> <?= ucfirst($r['status']) ?>
+                                        </span>
+                                    <?php endif; ?>
                                 </div>
                                 <div class="position-absolute bottom-0 start-0 m-3">
                                     <div class="bg-white px-3 py-1 rounded-pill text-primary fw-bold shadow-sm">

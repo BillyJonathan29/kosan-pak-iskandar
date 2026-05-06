@@ -15,6 +15,10 @@ class BookingController extends Controller {
             $bookings = $this->model('Booking')->getAllBookings();
         } else {
             $bookings = $this->model('Booking')->getBookingsByUserId($userId);
+            $paymentModel = $this->model('Payment');
+            foreach ($bookings as &$b) {
+                $b['payments'] = $paymentModel->getPaymentsByBookingIdAll($b['id']);
+            }
         }
 
         $data = [
@@ -56,6 +60,35 @@ class BookingController extends Controller {
             $_POST['total_price'] = $room ? ($room['price'] * $_POST['duration']) : $_POST['total_price'];
 
             $this->model('Booking')->updateBooking($_POST);
+            
+            // Generate monthly payments if status is confirmed
+            if ($_POST['status'] === 'confirmed') {
+                $paymentModel = $this->model('Payment');
+                $booking = $this->model('Booking')->getBookingById($_POST['id']);
+                
+                // Cek apakah payment sudah pernah di-generate (untuk menghindari duplicate)
+                $existing = $paymentModel->getPaymentsByBookingIdAll($booking['id']);
+                if (empty($existing)) {
+                    $duration = (int)$booking['duration'];
+                    $amount_per_month = $booking['room_price'];
+                    
+                    for ($i = 1; $i <= $duration; $i++) {
+                        $due_date = date('Y-m-d', strtotime("+" . ($i - 1) . " months", strtotime($booking['booking_date'])));
+                        $orderId = 'BOOK-' . $booking['id'] . '-M' . $i . '-' . time();
+                        
+                        $paymentData = [
+                            'booking_id' => $booking['id'],
+                            'order_id' => $orderId,
+                            'amount' => $amount_per_month,
+                            'billing_month' => $i,
+                            'due_date' => $due_date
+                        ];
+                        
+                        $paymentModel->createPaymentMonthly($paymentData);
+                    }
+                }
+            }
+
             header('Location: ' . BASEURL . '/booking');
             exit;
         }

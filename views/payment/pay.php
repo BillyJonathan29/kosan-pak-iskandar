@@ -84,15 +84,23 @@
 
             <div class="card border-0 shadow-sm rounded-5 p-4 mb-4">
                 <h6 class="fw-800 mb-3"><i class="fas fa-sparkles text-warning me-2"></i> Fasilitas Kamar</h6>
-                <div class="row g-2">
-                    <?php foreach ($facilities as $f): ?>
-                        <div class="col-md-4 col-6">
-                            <div class="d-flex align-items-center p-2 rounded-3">
-                                <i class="<?= $f['icon'] ?? 'fas fa-check' ?> text-primary me-3"></i>
-                                <span class="small fw-bold"><?= htmlspecialchars($f['facility_name']) ?></span>
+                <div class="row g-3">
+                    <?php if (!empty($facilities)): ?>
+                        <?php foreach ($facilities as $f): ?>
+                            <div class="col-md-4 col-6">
+                                <div class="d-flex align-items-center p-2 rounded-3 bg-light h-100 transition-hover">
+                                    <i class="<?= htmlspecialchars($f['icon'] ?? 'fas fa-check') ?> text-primary me-3 fs-5"></i>
+                                    <span class="small fw-bold text-dark"><?= htmlspecialchars($f['facility_name']) ?></span>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <div class="col-12">
+                            <div class="alert alert-secondary border-0 small mb-0 rounded-4">
+                                <i class="fas fa-info-circle me-2"></i> Belum ada data fasilitas untuk kamar ini.
                             </div>
                         </div>
-                    <?php endforeach; ?>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>
@@ -172,6 +180,8 @@ ob_start();
     .bg-primary-subtle { background-color: #e0e7ff; }
     .bg-success-subtle { background-color: #dcfce7; }
     .bg-warning-subtle { background-color: #fef9c3; }
+    .transition-hover { transition: all 0.3s ease; }
+    .transition-hover:hover { background-color: #e0e7ff !important; transform: translateY(-2px); }
 </style>
 <?php
 $scripts = ob_get_clean();

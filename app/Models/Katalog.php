@@ -23,6 +23,17 @@ class Katalog {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    // ─── Ambil semua kamar tanpa filter status ────────────────────────────────
+    public function getAllRooms() {
+        $query = "SELECT r.*, k.name AS kos_name, k.address AS kos_address
+                  FROM rooms r
+                  JOIN kos k ON r.kos_id = k.id
+                  ORDER BY r.created_at DESC";
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
     // ─── Ambil detail 1 kamar berdasarkan ID ──────────────────────────────────
     public function getRoomDetail($id) {
         $query = "SELECT r.*, k.name AS kos_name, k.address AS kos_address,

@@ -14,7 +14,7 @@ class PaymentController extends Controller {
         Config::$is3ds = MIDTRANS_IS_3DS;
     }
 
-    public function pay($bookingId) {
+    public function pay($paymentId) {
         if (!isset($_SESSION['user'])) {
             header('Location: ' . BASEURL . '/auth');
             exit;
@@ -23,9 +23,16 @@ class PaymentController extends Controller {
         $paymentModel = $this->model('Payment');
         $bookingModel = $this->model('Booking');
         
-        $booking = $bookingModel->getBookingById($bookingId);
+        $payment = $paymentModel->getPaymentById($paymentId);
         
-        // 1. Validasi Akses: Harus milik user ybs, status confirmed, dan belum dibayar
+        if (!$payment) {
+            header('Location: ' . BASEURL . '/booking');
+            exit;
+        }
+
+        $booking = $bookingModel->getBookingById($payment['booking_id']);
+        
+        // 1. Validasi Akses: Harus milik user ybs dan status confirmed
         if (!$booking || $booking['user_id'] != $_SESSION['user']['id']) {
             header('Location: ' . BASEURL . '/booking');
             exit;
@@ -37,42 +44,32 @@ class PaymentController extends Controller {
             exit;
         }
 
-        $payment = $paymentModel->getPaymentByBookingId($bookingId);
-        
-        if ($payment && $payment['payment_status'] === 'paid') {
-            $_SESSION['flash'] = ['pesan' => 'Booking ini sudah dibayar.', 'tipe' => 'info'];
+        if ($payment['payment_status'] === 'paid') {
+            $_SESSION['flash'] = ['pesan' => 'Tagihan ini sudah dibayar.', 'tipe' => 'info'];
             header('Location: ' . BASEURL . '/booking');
             exit;
         }
 
-        // 2. Buat Pembayaran jika belum ada
-        if (!$payment) {
-            $orderId = 'BOOK-' . $bookingId . '-' . time();
-            $amount = $booking['total_price'];
-
+        // 2. Generate Snap Token jika belum ada
+        if (empty($payment['snap_token'])) {
             $params = [
                 'transaction_details' => [
-                    'order_id' => $orderId,
-                    'gross_amount' => (int)$amount,
+                    'order_id' => $payment['order_id'],
+                    'gross_amount' => (int)$payment['amount'],
                 ],
                 'customer_details' => [
                     'first_name' => $_SESSION['user']['name'],
                     'email' => $_SESSION['user']['email'],
                 ],
+                'callbacks' => [
+                    'finish' => BASEURL . '/payment/finish'
+                ]
             ];
 
             try {
                 $snapToken = Snap::getSnapToken($params);
-                
-                $paymentData = [
-                    'booking_id' => $bookingId,
-                    'order_id' => $orderId,
-                    'snap_token' => $snapToken,
-                    'amount' => $amount
-                ];
-                
-                $paymentModel->createPayment($paymentData);
-                $payment = $paymentModel->getPaymentByOrderId($orderId);
+                $paymentModel->updateSnapToken($payment['id'], $snapToken);
+                $payment['snap_token'] = $snapToken;
             } catch (Exception $e) {
                 echo $e->getMessage();
                 exit;
@@ -131,10 +128,22 @@ class PaymentController extends Controller {
         if ($payment_status === 'paid') {
             $payment = $paymentModel->getPaymentByOrderId($order_id);
             if ($payment) {
-                $booking = $this->model('Booking')->getBookingById($payment['booking_id']);
-                if ($booking) {
+                // Selalu update kamar jadi occupied jika ada pembayaran lunas
+                $this->model('Katalog')->updateRoomStatusOccupied($payment['room_id']);
+
+                // Cek apakah semua tagihan sudah lunas
+                $allPayments = $paymentModel->getPaymentsByBookingIdAll($payment['booking_id']);
+                $isAllPaid = true;
+                foreach ($allPayments as $p) {
+                    if ($p['payment_status'] !== 'paid') {
+                        $isAllPaid = false;
+                        break;
+                    }
+                }
+
+                // Hanya set completed jika semua tagihan lunas
+                if ($isAllPaid) {
                     $this->model('Booking')->updateStatus($payment['booking_id'], 'completed');
-                    $this->model('Katalog')->updateRoomStatusOccupied($booking['room_id']);
                 }
             }
         }

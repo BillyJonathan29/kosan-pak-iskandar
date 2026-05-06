@@ -40,17 +40,17 @@
         </nav>
     </div>
 
-    <a class="nav-link" href="<?= BASEURL ?>/penyewa">
+    <!-- <a class="nav-link" href="<?= BASEURL ?>/penyewa">
         <div class="sb-nav-link-icon"><i class="fas fa-user-check"></i></div>
         Data Penyewa
-    </a>
+    </a> -->
     <a class="nav-link" href="<?= BASEURL ?>/booking">
         <div class="sb-nav-link-icon"><i class="fas fa-calendar-check"></i></div>
         Booking
     </a>
-    <a class="nav-link" href="<?= BASEURL ?>/pembayaran">
+    <a class="nav-link" href="<?= BASEURL ?>/transaction">
         <div class="sb-nav-link-icon"><i class="fas fa-money-bill-wave"></i></div>
-        Pembayaran
+        Data Transaksi
     </a>
 
     <div class="sb-sidenav-menu-heading">Akun</div>

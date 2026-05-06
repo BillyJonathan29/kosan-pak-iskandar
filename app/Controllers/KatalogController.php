@@ -20,8 +20,8 @@ class KatalogController extends Controller {
                 ['label' => 'Home',    'url' => BASEURL],
                 ['label' => 'Katalog', 'url' => '']
             ],
-            // Hanya kamar berstatus 'available'
-            'rooms' => $this->model('Katalog')->getAvailableRooms(),
+            // Ambil semua kamar termasuk yang sudah dibooking/terisi
+            'rooms' => $this->model('Katalog')->getAllRooms(),
         ];
 
         $this->view('katalog/index', $data);
