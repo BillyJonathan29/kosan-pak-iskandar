@@ -4,9 +4,11 @@ use Midtrans\Config;
 use Midtrans\Snap;
 use Midtrans\Notification;
 
-class PaymentController extends Controller {
+class PaymentController extends Controller
+{
 
-    public function __construct() {
+    public function __construct()
+    {
         // Set Midtrans configuration
         Config::$serverKey = MIDTRANS_SERVER_KEY;
         Config::$isProduction = MIDTRANS_IS_PRODUCTION;
@@ -14,7 +16,8 @@ class PaymentController extends Controller {
         Config::$is3ds = MIDTRANS_IS_3DS;
     }
 
-    public function pay($paymentId) {
+    public function pay($paymentId)
+    {
         if (!isset($_SESSION['user'])) {
             header('Location: ' . BASEURL . '/auth');
             exit;
@@ -22,16 +25,16 @@ class PaymentController extends Controller {
 
         $paymentModel = $this->model('Payment');
         $bookingModel = $this->model('Booking');
-        
+
         $payment = $paymentModel->getPaymentById($paymentId);
-        
+
         if (!$payment) {
             header('Location: ' . BASEURL . '/booking');
             exit;
         }
 
         $booking = $bookingModel->getBookingById($payment['booking_id']);
-        
+
         // 1. Validasi Akses: Harus milik user ybs dan status confirmed
         if (!$booking || $booking['user_id'] != $_SESSION['user']['id']) {
             header('Location: ' . BASEURL . '/booking');
@@ -90,7 +93,8 @@ class PaymentController extends Controller {
         $this->view('payment/pay', $data);
     }
 
-    public function notification() {
+    public function notification()
+    {
         try {
             $notif = new Notification();
         } catch (Exception $e) {
@@ -149,7 +153,71 @@ class PaymentController extends Controller {
         }
     }
 
-    public function finish() {
+    public function finish()
+    {
+        // If order_id is present, try to immediately verify transaction status
+        $order_id = $_GET['order_id'] ?? null;
+        if ($order_id) {
+            try {
+                $resp = \Midtrans\Transaction::status($order_id);
+            } catch (Exception $e) {
+                $_SESSION['flash'] = ['pesan' => 'Pembayaran berhasil. Menunggu konfirmasi.', 'tipe' => 'success'];
+                header('Location: ' . BASEURL . '/booking');
+                exit;
+            }
+
+            $transaction = $resp->transaction_status ?? ($resp['transaction_status'] ?? null);
+            $fraud = $resp->fraud_status ?? ($resp['fraud_status'] ?? null);
+
+            $payment_status = 'pending';
+            $paid_at = null;
+
+            if ($transaction == 'settlement') {
+                $payment_status = 'paid';
+                $paid_at = date('Y-m-d H:i:s');
+            } else if ($transaction == 'pending') {
+                $payment_status = 'pending';
+            } else if ($transaction == 'deny' || $transaction == 'expire' || $transaction == 'cancel') {
+                $payment_status = ($transaction == 'expire') ? 'expired' : 'failed';
+            }
+
+            $paymentModel = $this->model('Payment');
+            $paymentData = [
+                'transaction_id' => $resp->transaction_id ?? ($resp['transaction_id'] ?? null),
+                'payment_method' => $resp->payment_type ?? ($resp['payment_type'] ?? null),
+                'payment_status' => $payment_status,
+                'paid_at' => $paid_at
+            ];
+
+            $paymentModel->updatePaymentStatus($order_id, $paymentData);
+
+            // If paid, perform the same follow-up actions as in notification
+            if ($payment_status === 'paid') {
+                $payment = $paymentModel->getPaymentByOrderId($order_id);
+                if ($payment) {
+                    $this->model('Katalog')->updateRoomStatusOccupied($payment['room_id']);
+
+                    $allPayments = $paymentModel->getPaymentsByBookingIdAll($payment['booking_id']);
+                    $isAllPaid = true;
+                    foreach ($allPayments as $p) {
+                        if ($p['payment_status'] !== 'paid') {
+                            $isAllPaid = false;
+                            break;
+                        }
+                    }
+
+                    if ($isAllPaid) {
+                        $this->model('Booking')->updateStatus($payment['booking_id'], 'completed');
+                    }
+                }
+            }
+
+            $_SESSION['flash'] = ['pesan' => 'Pembayaran berhasil diproses.', 'tipe' => 'success'];
+            header('Location: ' . BASEURL . '/booking');
+            exit;
+        }
+
+        // Fallback if no order_id provided
         $_SESSION['flash'] = [
             'pesan' => 'Pembayaran sedang diproses atau berhasil!',
             'tipe' => 'success'
@@ -158,7 +226,49 @@ class PaymentController extends Controller {
         exit;
     }
 
-    public function unfinish() {
+    public function invoice($paymentId = null)
+    {
+        if (!isset($_SESSION['user'])) {
+            header('Location: ' . BASEURL . '/auth');
+            exit;
+        }
+
+        if (!$paymentId) {
+            header('Location: ' . BASEURL . '/booking');
+            exit;
+        }
+
+        $paymentModel = $this->model('Payment');
+        $payment = $paymentModel->getPaymentById($paymentId);
+
+        if (!$payment || $payment['tenant_email'] !== $_SESSION['user']['email']) {
+            header('Location: ' . BASEURL . '/booking');
+            exit;
+        }
+
+        // Gunakan Dompdf untuk render PDF
+        require_once __DIR__ . '/../../vendor/autoload.php';
+        $options = new \Dompdf\Options();
+        $options->set('isRemoteEnabled', true);
+        $dompdf = new \Dompdf\Dompdf($options);
+
+        // Siapkan HTML invoice (gunakan view sederhana)
+        ob_start();
+        $invoiceData = $payment;
+        require __DIR__ . '/../../views/payment/invoice_template.php';
+        $html = ob_get_clean();
+
+        $dompdf->loadHtml($html);
+        $dompdf->setPaper('A4', 'portrait');
+        $dompdf->render();
+
+        $filename = 'kwitansi-' . $payment['order_id'] . '.pdf';
+        $dompdf->stream($filename, ['Attachment' => 1]);
+        exit;
+    }
+
+    public function unfinish()
+    {
         $_SESSION['flash'] = [
             'pesan' => 'Pembayaran belum diselesaikan.',
             'tipe' => 'warning'
@@ -167,7 +277,8 @@ class PaymentController extends Controller {
         exit;
     }
 
-    public function error() {
+    public function error()
+    {
         $_SESSION['flash'] = [
             'pesan' => 'Terjadi kesalahan saat pembayaran.',
             'tipe' => 'danger'

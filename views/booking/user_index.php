@@ -35,32 +35,32 @@
         <div class="row g-4">
             <?php foreach ($bookings as $b) : ?>
                 <?php
-                    // Set Status Badges
-                    $badgeClass = match($b['status']) {
-                        'pending'   => 'badge-warning-glass',
-                        'confirmed' => 'badge-success-glass',
-                        'cancelled' => 'badge-danger-glass',
-                        'completed' => 'badge-primary-glass',
-                        default     => 'badge-secondary-glass'
-                    };
-                    $label = match($b['status']) {
-                        'pending'   => 'Menunggu Konfirmasi',
-                        'confirmed' => 'Aktif',
-                        'cancelled' => 'Dibatalkan',
-                        'completed' => 'Selesai',
-                        default     => ucfirst($b['status'])
-                    };
+                // Set Status Badges
+                $badgeClass = match ($b['status']) {
+                    'pending'   => 'badge-warning-glass',
+                    'confirmed' => 'badge-success-glass',
+                    'cancelled' => 'badge-danger-glass',
+                    'completed' => 'badge-primary-glass',
+                    default     => 'badge-secondary-glass'
+                };
+                $label = match ($b['status']) {
+                    'pending'   => 'Menunggu Konfirmasi',
+                    'confirmed' => 'Aktif',
+                    'cancelled' => 'Dibatalkan',
+                    'completed' => 'Selesai',
+                    default     => ucfirst($b['status'])
+                };
 
-                    // Set Image Source
-                    $imgSrc = !empty($b['image']) 
-                        ? BASEURL . '/assets/img/rooms/' . $b['image'] 
-                            : 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=400&q=80';
+                // Set Image Source
+                $imgSrc = !empty($b['image'])
+                    ? BASEURL . '/assets/img/rooms/' . $b['image']
+                    : 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=400&q=80';
                 ?>
                 <div class="col-12 animate__animated animate__fadeInUp">
                     <div class="booking-card card border-0 rounded-4 overflow-hidden position-relative">
                         <!-- Dekorasi border kiri -->
                         <div class="status-indicator <?= $b['status'] ?>"></div>
-                        
+
                         <div class="card-body p-0">
                             <div class="row g-0 align-items-center">
                                 <!-- Bagian Gambar -->
@@ -74,17 +74,24 @@
                                         </div>
                                     </div>
                                 </div>
-                                
+
                                 <!-- Bagian Info -->
                                 <div class="col-md-5 col-sm-8 p-3 p-sm-0 pe-md-3">
                                     <h4 class="fw-bold text-dark mb-1 d-flex align-items-center gap-2">
                                         Kamar <?= htmlspecialchars($b['room_number']); ?>
                                         <span class="badge bg-light text-secondary border rounded-pill fs-7 fw-normal">#<?= $b['id'] ?></span>
                                     </h4>
+                                    <?php if (in_array($b['status'], ['confirmed', 'completed'])): ?>
+                                        <div class="mt-2">
+                                            <a href="<?= BASEURL ?>/booking/extend/<?= $b['id'] ?>" class="btn btn-sm btn-outline-primary rounded-pill">
+                                                <i class="fas fa-redo-alt me-1"></i> Perpanjangan Sewa
+                                            </a>
+                                        </div>
+                                    <?php endif; ?>
                                     <p class="text-muted mb-3 d-flex align-items-center gap-2">
                                         <i class="fas fa-building text-primary"></i> <?= htmlspecialchars($b['kos_name']); ?>
                                     </p>
-                                    
+
                                     <div class="d-flex flex-wrap gap-3">
                                         <div class="info-pill">
                                             <i class="far fa-calendar-check text-success"></i>
@@ -96,7 +103,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                
+
                                 <!-- Bagian Harga & Tagihan -->
                                 <div class="col-12 border-top bg-light-soft p-4 mt-3">
                                     <div class="d-flex justify-content-between align-items-center mb-3">
@@ -106,18 +113,18 @@
                                             <div class="fw-bold text-dark">Rp <?= number_format($b['total_price'], 0, ',', '.'); ?></div>
                                         </div>
                                     </div>
-                                    
+
                                     <?php if (in_array($b['status'], ['confirmed', 'completed']) && !empty($b['payments'])): ?>
                                         <div class="row g-3">
-                                            <?php 
+                                            <?php
                                             $foundUnpaid = false;
-                                            foreach ($b['payments'] as $index => $pay): 
+                                            foreach ($b['payments'] as $index => $pay):
                                                 $isPaid = $pay['payment_status'] === 'paid';
                                                 $isPayable = !$isPaid && !$foundUnpaid;
                                                 if (!$isPaid && !$foundUnpaid) {
                                                     $foundUnpaid = true;
                                                 }
-                                                
+
                                                 $statusBadge = $isPaid ? '<span class="badge bg-success"><i class="fas fa-check-circle me-1"></i>Lunas</span>' : '<span class="badge bg-warning text-dark"><i class="fas fa-hourglass-half me-1"></i>Belum Lunas</span>';
                                                 $dueDate = $pay['due_date'] ? date('d M Y', strtotime($pay['due_date'])) : '-';
                                             ?>
@@ -140,6 +147,10 @@
                                                                 <button class="btn btn-sm btn-outline-success w-100 rounded-pill" disabled>
                                                                     <i class="fas fa-check"></i> Selesai
                                                                 </button>
+                                                                <!-- Cetak Kwitansi PDF -->
+                                                                <a href="<?= BASEURL ?>/payment/invoice/<?= $pay['id'] ?>" target="_blank" class="btn btn-sm btn-outline-primary w-100 rounded-pill mt-2 hover-scale">
+                                                                    <i class="fas fa-file-pdf"></i> Cetak Kwitansi (PDF)
+                                                                </a>
                                                             <?php else: ?>
                                                                 <button class="btn btn-sm btn-secondary w-100 rounded-pill opacity-50" disabled>
                                                                     Menunggu Bulan <?= $pay['billing_month'] - 1 ?> Lunas
@@ -172,39 +183,73 @@ ob_start();
 ?>
 <style>
     /* Typography & Utilities */
-    .fw-800 { font-weight: 800; }
-    .fs-7 { font-size: 0.75rem; }
-    .tracking-tight { letter-spacing: -0.5px; }
-    .tracking-wider { letter-spacing: 1px; }
+    .fw-800 {
+        font-weight: 800;
+    }
+
+    .fs-7 {
+        font-size: 0.75rem;
+    }
+
+    .tracking-tight {
+        letter-spacing: -0.5px;
+    }
+
+    .tracking-wider {
+        letter-spacing: 1px;
+    }
+
     .text-gradient {
         background: linear-gradient(135deg, #4361ee 0%, #4cc9f0 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         background-clip: text;
     }
-    .bg-light-soft { background-color: rgba(248, 249, 250, 0.5); }
-    .border-start-md { border-left: 1px dashed #e9ecef; }
+
+    .bg-light-soft {
+        background-color: rgba(248, 249, 250, 0.5);
+    }
+
+    .border-start-md {
+        border-left: 1px dashed #e9ecef;
+    }
+
     @media (max-width: 767.98px) {
-        .border-start-md { border-left: none; border-top: 1px dashed #e9ecef; }
+        .border-start-md {
+            border-left: none;
+            border-top: 1px dashed #e9ecef;
+        }
     }
 
     /* Cards & Interactions */
     .booking-card {
         background: #ffffff;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.03);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03);
         transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
-        border: 1px solid rgba(0,0,0,0.02) !important;
+        border: 1px solid rgba(0, 0, 0, 0.02) !important;
     }
+
     .booking-card:hover {
         transform: translateY(-5px);
         box-shadow: 0 20px 40px rgba(43, 45, 66, 0.08);
     }
+
     .booking-card:hover .transition-transform {
         transform: scale(1.05);
     }
-    .transition-transform { transition: transform 0.5s ease; }
-    .hover-scale { transition: transform 0.2s ease, box-shadow 0.2s ease; }
-    .hover-scale:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(67, 97, 238, 0.15); }
+
+    .transition-transform {
+        transition: transform 0.5s ease;
+    }
+
+    .hover-scale {
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .hover-scale:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(67, 97, 238, 0.15);
+    }
 
     /* Indicator Line */
     .status-indicator {
@@ -215,10 +260,22 @@ ob_start();
         width: 6px;
         z-index: 10;
     }
-    .status-indicator.confirmed { background: linear-gradient(to bottom, #10b981, #34d399); }
-    .status-indicator.pending { background: linear-gradient(to bottom, #f59e0b, #fbbf24); }
-    .status-indicator.cancelled { background: linear-gradient(to bottom, #ef4444, #f87171); }
-    .status-indicator.completed { background: linear-gradient(to bottom, #4361ee, #4cc9f0); }
+
+    .status-indicator.confirmed {
+        background: linear-gradient(to bottom, #10b981, #34d399);
+    }
+
+    .status-indicator.pending {
+        background: linear-gradient(to bottom, #f59e0b, #fbbf24);
+    }
+
+    .status-indicator.cancelled {
+        background: linear-gradient(to bottom, #ef4444, #f87171);
+    }
+
+    .status-indicator.completed {
+        background: linear-gradient(to bottom, #4361ee, #4cc9f0);
+    }
 
     /* Buttons */
     .btn-gradient-primary {
@@ -226,6 +283,7 @@ ob_start();
         color: white;
         border: none;
     }
+
     .btn-gradient-primary:hover {
         background: linear-gradient(135deg, #3a0ca3 0%, #4361ee 100%);
         color: white;
@@ -242,11 +300,36 @@ ob_start();
         font-size: 0.85rem;
         color: #6c757d;
     }
-    .badge-success-glass { background: rgba(16, 185, 129, 0.15); color: #059669; border: 1px solid rgba(16, 185, 129, 0.2); }
-    .badge-warning-glass { background: rgba(245, 158, 11, 0.15); color: #d97706; border: 1px solid rgba(245, 158, 11, 0.2); }
-    .badge-danger-glass { background: rgba(239, 68, 68, 0.15); color: #dc2626; border: 1px solid rgba(239, 68, 68, 0.2); }
-    .badge-primary-glass { background: rgba(67, 97, 238, 0.15); color: #4361ee; border: 1px solid rgba(67, 97, 238, 0.2); }
-    .badge-secondary-glass { background: rgba(108, 117, 125, 0.15); color: #495057; border: 1px solid rgba(108, 117, 125, 0.2); }
+
+    .badge-success-glass {
+        background: rgba(16, 185, 129, 0.15);
+        color: #059669;
+        border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .badge-warning-glass {
+        background: rgba(245, 158, 11, 0.15);
+        color: #d97706;
+        border: 1px solid rgba(245, 158, 11, 0.2);
+    }
+
+    .badge-danger-glass {
+        background: rgba(239, 68, 68, 0.15);
+        color: #dc2626;
+        border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .badge-primary-glass {
+        background: rgba(67, 97, 238, 0.15);
+        color: #4361ee;
+        border: 1px solid rgba(67, 97, 238, 0.2);
+    }
+
+    .badge-secondary-glass {
+        background: rgba(108, 117, 125, 0.15);
+        color: #495057;
+        border: 1px solid rgba(108, 117, 125, 0.2);
+    }
 </style>
 <?php
 $scripts = ob_get_clean();

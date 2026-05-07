@@ -52,7 +52,7 @@ if (!isset($_SESSION['user'])) {
                             <?= ucfirst($_SESSION['user']['role'] ?? 'Pengunjung'); ?>
                         </small>
 
-                        <a href="<?= BASEURL ?>/profile" class="btn btn-sm btn-secondary mb-2">
+                        <a href="<?= BASEURL ?>/user/edit/<?= $_SESSION['user']['id'] ?>" class="btn btn-sm btn-secondary mb-2">
                             Lihat Profile
                         </a>
                     </li>

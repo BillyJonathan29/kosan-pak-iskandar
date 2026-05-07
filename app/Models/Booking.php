@@ -122,11 +122,49 @@ class Booking
         return $stmt->execute();
     }
 
+    /**
+     * Cek booking yang sudah lewat masa sewa dan mengembalikan status kamar menjadi available
+     * Dipanggil secara berkala (cron) atau pada saat user membuka halaman booking
+     */
+    public function expireBookings()
+    {
+        $stmt = $this->conn->prepare("SELECT id, room_id, booking_date, duration, status FROM bookings WHERE status IN ('confirmed', 'completed')");
+        $stmt->execute();
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        require_once __DIR__ . '/Katalog.php';
+        $katalog = new Katalog();
+
+        foreach ($rows as $r) {
+            $start = $r['booking_date'];
+            $duration = (int)$r['duration'];
+            $endDate = date('Y-m-d', strtotime("+" . $duration . " months", strtotime($start)));
+
+            // Jika masa sewa sudah lewat (hari ini > endDate)
+            if (strtotime(date('Y-m-d')) > strtotime($endDate)) {
+                // Set booking jadi completed kalau belum
+                if ($r['status'] !== 'completed') {
+                    $this->updateStatus($r['id'], 'completed');
+                }
+
+                // Kembalikan status kamar jadi available
+                $katalog->updateRoomStatusAvailable($r['room_id']);
+            }
+        }
+        return true;
+    }
+
     // ─── DELETE ──────────────────────────────────────────────────────────────
 
     public function deleteBooking($id)
     {
         try {
+            // Ambil booking dulu untuk mengetahui room_id
+            $stmtGet = $this->conn->prepare("SELECT room_id FROM bookings WHERE id = :id LIMIT 1");
+            $stmtGet->bindParam(':id', $id);
+            $stmtGet->execute();
+            $booking = $stmtGet->fetch(PDO::FETCH_ASSOC);
+
             // 1. Hapus data anak (payments) yang menempel dengan booking ini terlebih dahulu
             $stmtPayment = $this->conn->prepare("DELETE FROM payments WHERE booking_id = :id");
             $stmtPayment->bindParam(':id', $id);
@@ -135,11 +173,50 @@ class Booking
             // 2. Setelah data anak bersih, baru hapus data induknya (bookings)
             $stmt = $this->conn->prepare("DELETE FROM bookings WHERE id = :id");
             $stmt->bindParam(':id', $id);
+            $res = $stmt->execute();
 
-            return $stmt->execute();
+            // Jika berhasil hapus booking, pastikan room dikembalikan ke status 'available'
+            if ($res && $booking && isset($booking['room_id'])) {
+                require_once __DIR__ . '/Katalog.php';
+                $katalog = new Katalog();
+                $katalog->updateRoomStatusAvailable($booking['room_id']);
+            }
+
+            return $res;
         } catch (PDOException $e) {
             // Tangkap error jika masih ada masalah lain
             error_log("Error deleting booking: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Tandai booking sebagai cancelled (tetap simpan datanya) dan kembalikan status kamar
+     */
+    public function cancelBooking($id)
+    {
+        try {
+            // Ambil booking untuk mengetahui room_id
+            $stmtGet = $this->conn->prepare("SELECT room_id FROM bookings WHERE id = :id LIMIT 1");
+            $stmtGet->bindParam(':id', $id);
+            $stmtGet->execute();
+            $booking = $stmtGet->fetch(PDO::FETCH_ASSOC);
+
+            // Update status booking menjadi cancelled
+            $stmt = $this->conn->prepare("UPDATE bookings SET status = 'cancelled' WHERE id = :id");
+            $stmt->bindParam(':id', $id);
+            $ok = $stmt->execute();
+
+            // Kembalikan status kamar ke available
+            if ($ok && $booking && isset($booking['room_id'])) {
+                require_once __DIR__ . '/Katalog.php';
+                $katalog = new Katalog();
+                $katalog->updateRoomStatusAvailable($booking['room_id']);
+            }
+
+            return $ok;
+        } catch (PDOException $e) {
+            error_log("Error cancelling booking: " . $e->getMessage());
             return false;
         }
     }

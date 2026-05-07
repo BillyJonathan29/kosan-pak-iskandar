@@ -76,9 +76,9 @@
             <div class="row g-4" id="roomGrid">
                 <?php foreach ($rooms as $r) : ?>
                     <?php
-                        $imgSrc = !empty($r['image'])
-                            ? BASEURL . '/assets/img/rooms/' . $r['image']
-                            : 'https://images.unsplash.com/photo-1598928506311-c55ded91a20c?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80';
+                    $imgSrc = !empty($r['image'])
+                        ? BASEURL . '/assets/img/rooms/' . $r['image']
+                        : 'https://images.unsplash.com/photo-1598928506311-c55ded91a20c?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80';
                     ?>
                     <div class="col-lg-4 col-md-6 room-card-wrap"
                         data-search="<?= strtolower(htmlspecialchars($r['room_number'] . ' ' . $r['kos_name'] . ' ' . $r['kos_address'])); ?>">
@@ -125,17 +125,37 @@
                                         No. <?= htmlspecialchars($r['room_number']); ?>
                                     </span>
                                 </div>
-                                
+
                                 <div class="d-flex gap-3 my-3">
                                     <div class="text-muted small"><i class="fas fa-wifi me-1"></i> WiFi</div>
                                     <div class="text-muted small"><i class="fas fa-wind me-1"></i> AC</div>
                                     <div class="text-muted small"><i class="fas fa-bath me-1"></i> KM Dalam</div>
                                 </div>
 
-                                <a href="<?= BASEURL; ?>/katalog/detail/<?= $r['id']; ?>"
-                                    class="btn btn-outline-primary w-100 py-2 rounded-pill fw-bold transition-all mt-2">
-                                    Lihat Detail Kamar
-                                </a>
+                                <?php if ($r['status'] === 'available'): ?>
+                                    <a href="<?= BASEURL; ?>/katalog/detail/<?= $r['id']; ?>"
+                                        class="btn btn-outline-primary w-100 py-2 rounded-pill fw-bold transition-all mt-2">
+                                        Lihat Detail Kamar
+                                    </a>
+                                <?php elseif ($r['status'] === 'booked'): ?>
+                                    <button type="button" class="btn btn-warning w-100 py-2 rounded-pill fw-bold transition-all mt-2"
+                                        onclick="alert('Maaf, kamar ini sedang dibooking. Silakan cek kembali nanti atau hubungi admin untuk info lebih lanjut.')"
+                                        title="Kamar sedang dibooking" disabled>
+                                        Sudah Dibooking
+                                    </button>
+                                <?php elseif ($r['status'] === 'occupied'): ?>
+                                    <button type="button" class="btn btn-danger w-100 py-2 rounded-pill fw-bold transition-all mt-2"
+                                        onclick="alert('Kamar ini sudah terisi. Silakan pilih kamar lain atau hubungi admin.')"
+                                        title="Kamar terisi" disabled>
+                                        Terisi
+                                    </button>
+                                <?php else: ?>
+                                    <button type="button" class="btn btn-secondary w-100 py-2 rounded-pill fw-bold transition-all mt-2"
+                                        onclick="alert('Status kamar: <?= htmlspecialchars($r['status']); ?>. Silakan hubungi admin.')"
+                                        disabled>
+                                        Tidak Tersedia
+                                    </button>
+                                <?php endif; ?>
                             </div>
                         </div>
                     </div>
@@ -278,35 +298,49 @@ $content = ob_get_clean();
 ob_start();
 ?>
 <style>
-    .fw-800 { font-weight: 800; }
-    .shadow-2xl { box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15); }
-    .ms-n2 { margin-left: -0.75rem; }
-    .-space-x-2 { display: flex; }
-    
+    .fw-800 {
+        font-weight: 800;
+    }
+
+    .shadow-2xl {
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+    }
+
+    .ms-n2 {
+        margin-left: -0.75rem;
+    }
+
+    .-space-x-2 {
+        display: flex;
+    }
+
     .search-box {
         transition: all 0.3s ease;
     }
+
     .search-box:focus-within {
         box-shadow: 0 10px 30px rgba(67, 97, 238, 0.15) !important;
         border-color: var(--primary-color) !important;
     }
-    
+
     .room-card-wrap {
         transition: all 0.4s ease;
     }
-    
-    .transition-all { transition: all 0.3s ease; }
+
+    .transition-all {
+        transition: all 0.3s ease;
+    }
 </style>
 <script>
     // Live search
     document.getElementById('searchInput').addEventListener('input', function() {
-        const q     = this.value.toLowerCase().trim();
+        const q = this.value.toLowerCase().trim();
         const cards = document.querySelectorAll('.room-card-wrap');
         let visible = 0;
 
         cards.forEach(card => {
             const haystack = card.dataset.search;
-            const match    = !q || haystack.includes(q);
+            const match = !q || haystack.includes(q);
             card.style.display = match ? '' : 'none';
             if (match) {
                 visible++;

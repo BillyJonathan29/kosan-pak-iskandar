@@ -1,16 +1,17 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
     <title><?= $title ?? 'Daftar Akun - Kosan Pak Iskandar' ?></title>
-    
+
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    
+
     <!-- Bootstrap 5 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Font Awesome -->
@@ -177,14 +178,20 @@
             color: #94a3b8;
         }
 
-        .divider::before, .divider::after {
+        .divider::before,
+        .divider::after {
             content: '';
             flex: 1;
             border-bottom: 1px solid #e2e8f0;
         }
 
-        .divider:not(:empty)::before { margin-right: 1rem; }
-        .divider:not(:empty)::after { margin-left: 1rem; }
+        .divider:not(:empty)::before {
+            margin-right: 1rem;
+        }
+
+        .divider:not(:empty)::after {
+            margin-left: 1rem;
+        }
 
         .auth-footer {
             margin-top: 1.5rem;
@@ -207,6 +214,7 @@
             .auth-side-image {
                 display: none;
             }
+
             .auth-card {
                 max-width: 500px;
             }
@@ -216,12 +224,14 @@
             .auth-wrapper {
                 padding: 1rem;
             }
+
             .auth-form-container {
                 padding: 2rem;
             }
         }
     </style>
 </head>
+
 <body>
 
     <div class="auth-wrapper">
@@ -231,7 +241,7 @@
                 <div class="position-relative z-1">
                     <h2 class="display-5 fw-800 mb-4 animate__animated animate__fadeInDown animate__delay-1s">Mulai Perjalananmu <br>Bersama Kami.</h2>
                     <p class="lead opacity-75 mb-5 animate__animated animate__fadeInUp animate__delay-1s">Sistem manajemen kos yang memudahkan segala urusan hunianmu dalam satu genggaman.</p>
-                    
+
                     <div class="d-flex align-items-center gap-3 animate__animated animate__fadeInUp animate__delay-2s">
                         <div class="bg-white bg-opacity-25 p-3 rounded-4 backdrop-blur">
                             <i class="fas fa-check-double fs-3"></i>
@@ -254,7 +264,7 @@
                 <h1 class="auth-title">Buat Akun</h1>
                 <p class="auth-subtitle">Daftarkan diri Anda untuk mulai mencari hunian.</p>
 
-                <?php if(isset($_SESSION['flash'])): ?>
+                <?php if (isset($_SESSION['flash'])): ?>
                     <div class="alert alert-<?= $_SESSION['flash']['tipe'] ?> alert-dismissible fade show border-0 rounded-4 shadow-sm mb-4" role="alert">
                         <i class="fas fa-info-circle me-2"></i>
                         <?= $_SESSION['flash']['pesan'] ?>
@@ -282,7 +292,12 @@
 
                     <div class="mb-4">
                         <label class="form-label">Password</label>
-                        <input type="password" name="password" class="form-control" placeholder="••••••••" required>
+                        <div class="input-group">
+                            <input id="register-password" type="password" name="password" class="form-control" placeholder="••••••••" required>
+                            <button type="button" class="btn btn-outline-secondary" id="toggle-register-password" title="Tampilkan/ Sembunyikan Password">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
                     </div>
 
                     <div class="d-grid">
@@ -307,5 +322,23 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        (function() {
+            const pwd = document.getElementById('register-password');
+            const btn = document.getElementById('toggle-register-password');
+            if (btn && pwd) {
+                btn.addEventListener('click', function() {
+                    if (pwd.type === 'password') {
+                        pwd.type = 'text';
+                        btn.innerHTML = '<i class="fas fa-eye-slash"></i>';
+                    } else {
+                        pwd.type = 'password';
+                        btn.innerHTML = '<i class="fas fa-eye"></i>';
+                    }
+                });
+            }
+        })();
+    </script>
 </body>
+
 </html>

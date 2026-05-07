@@ -54,7 +54,13 @@
     </a>
 
     <div class="sb-sidenav-menu-heading">Akun</div>
-    <a class="nav-link" href="<?= BASEURL ?>/profile">
+    <?php
+    $profileUrl = BASEURL . '/profile';
+    if (isset($_SESSION['user']) && $_SESSION['user']['role'] === 'admin') {
+        $profileUrl = BASEURL . '/user/edit/' . $_SESSION['user']['id'];
+    }
+    ?>
+    <a class="nav-link" href="<?= $profileUrl ?>">
         <div class="sb-nav-link-icon"><i class="fas fa-user-cog"></i></div>
         Profil Saya
     </a>
