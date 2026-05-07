@@ -16,7 +16,6 @@
                 <thead>
                     <tr>
                         <th>No</th>
-                        <th>Icon</th>
                         <th>Nama Fasilitas</th>
                         <th>Aksi</th>
                     </tr>
@@ -25,12 +24,6 @@
                     <?php $no = 1; foreach ($facilities as $f) : ?>
                     <tr>
                         <td><?= $no++; ?></td>
-                        <td class="text-center">
-                            <?php if (!empty($f['icon'])): ?>
-                                <i class="<?= htmlspecialchars($f['icon']); ?> fa-lg"></i>
-                            <?php else: ?>
-                                <span class="text-muted">—</span>
-                            <?php endif; ?>
                         </td>
                         <td><?= htmlspecialchars($f['facility_name']); ?></td>
                         <td>
@@ -74,16 +67,6 @@ ob_start();
                         <label for="facility_name" class="form-label">Nama Fasilitas</label>
                         <input type="text" class="form-control" id="facility_name" name="facility_name"
                             required placeholder="Contoh: WiFi, AC, Kamar Mandi Dalam">
-                    </div>
-                    <div class="mb-3">
-                        <label for="icon" class="form-label">
-                            Icon <small class="text-muted">(Class FontAwesome, cth: <code>fas fa-wifi</code>)</small>
-                        </label>
-                        <div class="input-group">
-                            <span class="input-group-text" id="iconPreview"><i id="iconPreviewEl" class="fas fa-question"></i></span>
-                            <input type="text" class="form-control" id="icon" name="icon"
-                                placeholder="fas fa-wifi">
-                        </div>
                     </div>
                 </div>
                 <div class="modal-footer">

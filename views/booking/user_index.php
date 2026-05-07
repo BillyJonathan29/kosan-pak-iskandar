@@ -19,6 +19,24 @@
             </a>
         </div>
     </div>
+    
+    <!-- Flash Messages -->
+    <?php if (isset($_SESSION['flash'])) : ?>
+        <div class="alert alert-<?= $_SESSION['flash']['tipe']; ?> alert-dismissible fade show border-0 rounded-4 shadow-sm mb-4 animate__animated animate__fadeIn" role="alert">
+            <div class="d-flex align-items-center">
+                <?php if ($_SESSION['flash']['tipe'] === 'success') : ?>
+                    <i class="fas fa-check-circle me-3 fs-4"></i>
+                <?php else : ?>
+                    <i class="fas fa-exclamation-circle me-3 fs-4"></i>
+                <?php endif; ?>
+                <div>
+                    <?= $_SESSION['flash']['pesan']; ?>
+                </div>
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <?php unset($_SESSION['flash']); ?>
+    <?php endif; ?>
 
     <?php if (empty($bookings)) : ?>
         <!-- Empty State -->
@@ -52,9 +70,9 @@
                 };
 
                 // Set Image Source
-                $imgSrc = !empty($b['image'])
-                    ? BASEURL . '/assets/img/rooms/' . $b['image']
-                    : 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=400&q=80';
+                $imgSrc = !empty($b['room_image'])
+                    ? BASEURL . '/assets/img/rooms/' . $b['room_image']
+                    : BASEURL . '/assets/img/default-room.png';
                 ?>
                 <div class="col-12 animate__animated animate__fadeInUp">
                     <div class="booking-card card border-0 rounded-4 overflow-hidden position-relative">
@@ -82,10 +100,16 @@
                                         <span class="badge bg-light text-secondary border rounded-pill fs-7 fw-normal">#<?= $b['id'] ?></span>
                                     </h4>
                                     <?php if (in_array($b['status'], ['confirmed', 'completed'])): ?>
-                                        <div class="mt-2">
+                                        <div class="mt-2 d-flex flex-wrap gap-2">
                                             <a href="<?= BASEURL ?>/booking/extend/<?= $b['id'] ?>" class="btn btn-sm btn-outline-primary rounded-pill">
-                                                <i class="fas fa-redo-alt me-1"></i> Perpanjangan Sewa
+                                                <i class="fas fa-redo-alt me-1"></i> Perpanjangan
                                             </a>
+                                            <button type="button" class="btn btn-sm btn-outline-warning rounded-pill tombolUlasan" 
+                                                    data-bs-toggle="modal" data-bs-target="#reviewModal" 
+                                                    data-roomid="<?= $b['room_id'] ?>" 
+                                                    data-roomnumber="<?= $b['room_number'] ?>">
+                                                <i class="fas fa-star me-1"></i> Beri Ulasan
+                                            </button>
                                         </div>
                                     <?php endif; ?>
                                     <p class="text-muted mb-3 d-flex align-items-center gap-2">
@@ -330,7 +354,84 @@ ob_start();
         color: #495057;
         border: 1px solid rgba(108, 117, 125, 0.2);
     }
+
+    .star-rating {
+        display: flex;
+        flex-direction: row-reverse;
+        justify-content: flex-end;
+    }
+    .star-rating input {
+        display: none;
+    }
+    .star-rating label {
+        font-size: 2rem;
+        color: #ddd;
+        cursor: pointer;
+        transition: color 0.2s;
+    }
+    .star-rating input:checked ~ label,
+    .star-rating label:hover,
+    .star-rating label:hover ~ label {
+        color: #ffc107;
+    }
 </style>
+
+<!-- Review Modal -->
+<div class="modal fade" id="reviewModal" tabindex="-1" aria-labelledby="reviewModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content rounded-4 border-0 shadow">
+            <div class="modal-header border-0">
+                <h5 class="modal-title fw-bold" id="reviewModalLabel">Beri Ulasan Kamar</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="<?= BASEURL ?>/review/store" method="POST">
+                <input type="hidden" name="room_id" id="modal_room_id">
+                <div class="modal-body">
+                    <p class="text-muted small mb-4">Bagaimana pengalaman Anda tinggal di <strong id="modal_room_number"></strong>? Ulasan Anda sangat membantu calon penghuni lain.</p>
+                    
+                    <div class="mb-3">
+                        <label class="form-label d-block fw-bold">Rating</label>
+                        <div class="star-rating">
+                            <input type="radio" name="rating" id="star5" value="5" required><label for="star5" title="Sangat Baik"><i class="fas fa-star"></i></label>
+                            <input type="radio" name="rating" id="star4" value="4"><label for="star4" title="Baik"><i class="fas fa-star"></i></label>
+                            <input type="radio" name="rating" id="star3" value="3"><label for="star3" title="Cukup"><i class="fas fa-star"></i></label>
+                            <input type="radio" name="rating" id="star2" value="2"><label for="star2" title="Buruk"><i class="fas fa-star"></i></label>
+                            <input type="radio" name="rating" id="star1" value="1"><label for="star1" title="Sangat Buruk"><i class="fas fa-star"></i></label>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="comment" class="form-label fw-bold">Komentar</label>
+                        <textarea class="form-control rounded-3" name="comment" id="comment" rows="4" placeholder="Ceritakan pengalaman Anda..." required></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-primary-custom rounded-pill px-4">Kirim Ulasan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const reviewModal = document.getElementById('reviewModal');
+        if (reviewModal) {
+            reviewModal.addEventListener('show.bs.modal', function(event) {
+                const button = event.relatedTarget;
+                const roomId = button.getAttribute('data-roomid');
+                const roomNumber = button.getAttribute('data-roomnumber');
+                
+                const modalRoomId = reviewModal.querySelector('#modal_room_id');
+                const modalRoomNumber = reviewModal.querySelector('#modal_room_number');
+                
+                modalRoomId.value = roomId;
+                modalRoomNumber.textContent = 'Kamar ' + roomNumber;
+            });
+        }
+    });
+</script>
 <?php
 $scripts = ob_get_clean();
 

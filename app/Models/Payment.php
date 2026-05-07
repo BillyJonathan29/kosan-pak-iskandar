@@ -1,10 +1,12 @@
 <?php
 
-class Payment {
+class Payment
+{
     private $db;
     private $conn;
 
-    public function __construct() {
+    public function __construct()
+    {
         $this->db = new Database();
         $this->conn = $this->db->getConnection();
     }
@@ -12,37 +14,40 @@ class Payment {
     /**
      * Menyimpan data awal pembayaran (status pending)
      */
-    public function createPayment($data) {
+    public function createPayment($data)
+    {
         $query = "INSERT INTO payments (booking_id, order_id, snap_token, amount, payment_status, payment_method) 
                   VALUES (:booking_id, :order_id, :snap_token, :amount, 'unpaid', 'midtrans')";
-        
+
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(':booking_id', $data['booking_id']);
         $stmt->bindParam(':order_id', $data['order_id']);
         $stmt->bindParam(':snap_token', $data['snap_token']);
         $stmt->bindParam(':amount', $data['amount']);
-        
+
         return $stmt->execute();
     }
 
     /**
      * Menyimpan data tagihan bulanan awal tanpa snap_token
      */
-    public function createPaymentMonthly($data) {
+    public function createPaymentMonthly($data)
+    {
         $query = "INSERT INTO payments (booking_id, order_id, amount, payment_status, payment_method, billing_month, due_date) 
                   VALUES (:booking_id, :order_id, :amount, 'unpaid', 'midtrans', :billing_month, :due_date)";
-        
+
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(':booking_id', $data['booking_id']);
         $stmt->bindParam(':order_id', $data['order_id']);
         $stmt->bindParam(':amount', $data['amount']);
         $stmt->bindParam(':billing_month', $data['billing_month']);
         $stmt->bindParam(':due_date', $data['due_date']);
-        
+
         return $stmt->execute();
     }
 
-    public function updateSnapToken($id, $snap_token) {
+    public function updateSnapToken($id, $snap_token)
+    {
         $query = "UPDATE payments SET snap_token = :snap_token WHERE id = :id";
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(':snap_token', $snap_token);
@@ -50,49 +55,53 @@ class Payment {
         return $stmt->execute();
     }
 
-    public function getPaymentByBookingId($booking_id) {
+    public function getPaymentByBookingId($booking_id)
+    {
         $stmt = $this->conn->prepare("SELECT * FROM payments WHERE booking_id = :booking_id ORDER BY id DESC LIMIT 1");
         $stmt->bindParam(':booking_id', $booking_id);
         $stmt->execute();
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    public function getPaymentsByBookingIdAll($booking_id) {
+    public function getPaymentsByBookingIdAll($booking_id)
+    {
         $stmt = $this->conn->prepare("SELECT * FROM payments WHERE booking_id = :booking_id ORDER BY billing_month ASC");
         $stmt->bindParam(':booking_id', $booking_id);
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function getPaymentByOrderId($order_id) {
+    public function getPaymentByOrderId($order_id)
+    {
         $stmt = $this->conn->prepare("SELECT * FROM payments WHERE order_id = :order_id");
         $stmt->bindParam(':order_id', $order_id);
         $stmt->execute();
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    public function updatePaymentStatus($order_id, $data) {
+    public function updatePaymentStatus($order_id, $data)
+    {
         $query = "UPDATE payments SET 
                     transaction_id = :transaction_id,
                     payment_method = :payment_method,
                     payment_status = :payment_status";
-        
+
         if ($data['payment_status'] === 'paid') {
             $query .= ", paid_at = :paid_at";
         }
 
         $query .= " WHERE order_id = :order_id";
-        
+
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(':transaction_id', $data['transaction_id']);
         $stmt->bindParam(':payment_method', $data['payment_method']);
         $stmt->bindParam(':payment_status', $data['payment_status']);
         $stmt->bindParam(':order_id', $order_id);
-        
+
         if ($data['payment_status'] === 'paid') {
             $stmt->bindParam(':paid_at', $data['paid_at']);
         }
-        
+
         return $stmt->execute();
     }
 
@@ -100,7 +109,8 @@ class Payment {
      * Mengambil semua data pembayaran dengan JOIN ke bookings, users, dan rooms
      * Digunakan oleh Admin untuk memantau seluruh riwayat transaksi
      */
-    public function getAllPayments() {
+    public function getAllPayments()
+    {
         $query = "SELECT 
                     p.id,
                     p.order_id,
@@ -126,9 +136,37 @@ class Payment {
     }
 
     /**
+     * Menghitung total pendapatan untuk bulan tertentu berdasarkan kolom paid_at
+     * jika tidak ada pembayaran, mengembalikan 0
+     */
+    public function getMonthlyRevenue($year, $month)
+    {
+        $query = "SELECT COALESCE(SUM(amount), 0) AS total FROM payments WHERE payment_status = 'paid' AND YEAR(paid_at) = :year AND MONTH(paid_at) = :month";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':year', $year, PDO::PARAM_INT);
+        $stmt->bindParam(':month', $month, PDO::PARAM_INT);
+        $stmt->execute();
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        return isset($row['total']) ? (float)$row['total'] : 0.0;
+    }
+
+    /**
+     * Menghitung total tagihan tertunda (pending atau unpaid)
+     */
+    public function getPendingTotal()
+    {
+        $query = "SELECT COALESCE(SUM(amount), 0) AS total FROM payments WHERE payment_status IN ('pending', 'unpaid')";
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute();
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        return isset($row['total']) ? (float)$row['total'] : 0.0;
+    }
+
+    /**
      * Mengambil satu data pembayaran berdasarkan ID (untuk halaman Detail Transaksi)
      */
-    public function getPaymentById($id) {
+    public function getPaymentById($id)
+    {
         $query = "SELECT 
                     p.*,
                     u.name   AS tenant_name,

@@ -118,7 +118,8 @@
             padding: 5rem 0 2rem;
         }
 
-        .footer h5, .footer h6 {
+        .footer h5,
+        .footer h6 {
             color: white;
             font-weight: 700;
             margin-bottom: 1.5rem;
@@ -144,7 +145,7 @@
             align-items: center;
             justify-content: center;
             border-radius: 50%;
-            background: rgba(255,255,255,0.05);
+            background: rgba(255, 255, 255, 0.05);
             color: white;
             transition: all 0.3s;
             text-decoration: none;
@@ -169,7 +170,7 @@
         .page-content {
             min-height: 80vh;
         }
-        
+
         section {
             padding: 80px 0;
         }
@@ -180,7 +181,13 @@
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg sticky-top">
         <div class="container">
-            <a class="navbar-brand animate__animated animate__fadeInLeft" href="<?= BASEURL ?>">
+            <?php
+            $brandUrl = BASEURL;
+            if (isset($_SESSION['user']) && $_SESSION['user']['role'] === 'admin') {
+                $brandUrl = BASEURL . '/home';
+            }
+            ?>
+            <a class="navbar-brand animate__animated animate__fadeInLeft" href="<?= $brandUrl ?>">
                 <i class="fas fa-house-chimney-window"></i>
                 <span>Kosan Pak Iskandar</span>
             </a>
@@ -203,13 +210,13 @@
                             <a class="nav-link" href="#testimoni">Testimoni</a>
                         </li>
                     <?php endif; ?>
-                    
+
                     <?php if (isset($_SESSION['user'])): ?>
                         <li class="nav-item ms-lg-4">
                             <div class="dropdown">
                                 <a class="btn btn-primary-custom dropdown-toggle d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown">
-                                    <?php 
-                                        $avatar = !empty($_SESSION['user']['profile_image']) ? BASEURL . '/assets/img/profile/' . $_SESSION['user']['profile_image'] : BASEURL . '/assets/img/default-avatar.jpg';
+                                    <?php
+                                    $avatar = !empty($_SESSION['user']['profile_image']) ? BASEURL . '/assets/img/profile/' . $_SESSION['user']['profile_image'] : BASEURL . '/assets/img/default-avatar.jpg';
                                     ?>
                                     <img src="<?= $avatar ?>" class="rounded-circle me-2" width="25" height="25" style="object-fit: cover; border: 1px solid rgba(255,255,255,0.5);">
                                     <?= explode(' ', $_SESSION['user']['name'])[0] ?>
@@ -220,8 +227,11 @@
                                     <?php endif; ?>
                                     <li><a class="dropdown-item py-2 rounded-3" href="<?= BASEURL ?>/katalog"><i class="fas fa-search me-2 text-primary"></i> Cari Kamar</a></li>
                                     <li><a class="dropdown-item py-2 rounded-3" href="<?= BASEURL ?>/booking"><i class="fas fa-calendar-check me-2 text-primary"></i> Riwayat Booking</a></li>
+                                    <li><a class="dropdown-item py-2 rounded-3" href="<?= BASEURL ?>/review/my"><i class="fas fa-star me-2 text-primary"></i> Ulasan Saya</a></li>
                                     <li><a class="dropdown-item py-2 rounded-3" href="<?= BASEURL ?>/profile"><i class="fas fa-user-cog me-2 text-primary"></i> Profil Saya</a></li>
-                                    <li><hr class="dropdown-divider"></li>
+                                    <li>
+                                        <hr class="dropdown-divider">
+                                    </li>
                                     <li><a class="dropdown-item py-2 rounded-3 text-danger" href="<?= BASEURL ?>/auth/logout"><i class="fas fa-sign-out-alt me-2"></i> Logout</a></li>
                                 </ul>
                             </div>
@@ -242,64 +252,69 @@
     </div>
 
     <!-- Footer -->
-    <footer class="footer">
+    <footer class="footer bg-dark pt-5 pb-4">
         <div class="container">
             <div class="row g-5">
+
                 <div class="col-lg-4 col-md-12">
                     <div class="navbar-brand text-white mb-4">
                         <i class="fas fa-house-chimney-window text-primary"></i>
-                        <span class="text-white">Kosan Pak Iskandar</span>
+                        <span class="text-white ms-2">Kosan Pak Iskandar</span>
                     </div>
-                    <p class="text-muted mb-4" style="line-height: 1.8;">Menyediakan hunian yang tidak hanya sekadar tempat tinggal, tapi rumah kedua bagi Anda. Mengutamakan kenyamanan, keamanan, dan kebersihan.</p>
+                    <p class="text-light mb-4" style="line-height: 1.8;">
+                        Menyediakan hunian yang tidak hanya sekadar tempat tinggal, tapi rumah kedua bagi Anda. Mengutamakan kenyamanan, keamanan, dan kebersihan.
+                    </p>
                     <div class="d-flex gap-3">
-                        <a href="#" class="social-btn"><i class="fab fa-facebook-f"></i></a>
-                        <a href="#" class="social-btn"><i class="fab fa-instagram"></i></a>
-                        <a href="#" class="social-btn"><i class="fab fa-tiktok"></i></a>
-                        <a href="#" class="social-btn"><i class="fab fa-whatsapp"></i></a>
+                        <a href="https://wa.me/628122218062" target="_blank" class="social-btn text-success"><i class="fab fa-whatsapp fa-lg"></i></a>
                     </div>
                 </div>
-                <div class="col-lg-2 col-6">
-                    <h6>Navigasi</h6>
+
+                <div class="col-lg-3 col-md-6">
+                    <h6 class="text-white mb-3">Navigasi</h6>
                     <ul class="list-unstyled">
-                        <li><a href="#" class="footer-link">Beranda</a></li>
-                        <li><a href="#katalog" class="footer-link">Katalog Kamar</a></li>
-                        <li><a href="#fasilitas" class="footer-link">Fasilitas</a></li>
-                        <li><a href="#testimoni" class="footer-link">Testimoni</a></li>
+                        <li class="mb-2"><a href="#" class="text-light text-decoration-none footer-link">Beranda</a></li>
+                        <li class="mb-2"><a href="#katalog" class="text-light text-decoration-none footer-link">Katalog Kamar</a></li>
+                        <li class="mb-2"><a href="#fasilitas" class="text-light text-decoration-none footer-link">Fasilitas</a></li>
+                        <li class="mb-2"><a href="#testimoni" class="text-light text-decoration-none footer-link">Testimoni</a></li>
                     </ul>
                 </div>
-                <div class="col-lg-2 col-6">
-                    <h6>Bantuan</h6>
-                    <ul class="list-unstyled">
-                        <li><a href="#" class="footer-link">Cara Booking</a></li>
-                        <li><a href="#" class="footer-link">Syarat & Ketentuan</a></li>
-                        <li><a href="#" class="footer-link">Kebijakan Privasi</a></li>
-                        <li><a href="#" class="footer-link">FAQ</a></li>
-                    </ul>
-                </div>
-                <div class="col-lg-4 col-md-12">
-                    <h6>Lokasi & Kontak</h6>
-                    <ul class="list-unstyled">
+
+                <div class="col-lg-5 col-md-6">
+                    <h6 class="text-white mb-3">Lokasi & Kontak</h6>
+                    <ul class="list-unstyled mb-3">
                         <li class="mb-3 d-flex align-items-start">
                             <i class="fas fa-map-marker-alt text-primary me-3 mt-1"></i>
-                            <span class="text-muted">Jl. Raya Pendidikan No. 45, Kecamatan Sukolilo, Surabaya, Jawa Timur</span>
+                            <span class="text-light">2FGG+7GC, Jl. Pramuka, Purwawinangun, Kec. Kuningan, Kabupaten Kuningan, Jawa Barat 45512</span>
                         </li>
                         <li class="mb-3 d-flex align-items-center">
                             <i class="fas fa-phone-alt text-primary me-3"></i>
-                            <span class="text-muted">+62 812-3456-7890</span>
-                        </li>
-                        <li class="mb-3 d-flex align-items-center">
-                            <i class="fas fa-envelope text-primary me-3"></i>
-                            <span class="text-muted">halo@kosanpakiskandar.id</span>
+                            <span class="text-light">+62 812-2218-062</span>
                         </li>
                     </ul>
+
+                    <div class="mt-3">
+                        <iframe
+                            src="https://maps.google.com/maps?q=Jl.+Pramuka,+Purwawinangun,+Kec.+Kuningan,+Kabupaten+Kuningan,+Jawa+Barat+45512&t=&z=15&ie=UTF8&iwloc=&output=embed"
+                            width="100%"
+                            height="180"
+                            style="border:0; border-radius: 8px;"
+                            allowfullscreen=""
+                            loading="lazy"
+                            referrerpolicy="no-referrer-when-downgrade">
+                        </iframe>
+                        <a href="https://maps.app.goo.gl/qJzK9wR1o7n7WbU6A" target="_blank" class="small text-primary text-decoration-none mt-2 d-inline-block">
+                            <i class="fas fa-external-link-alt me-1"></i> Buka di Google Maps
+                        </a>
+                    </div>
                 </div>
+
             </div>
-            <div class="pt-5 mt-5 border-top border-secondary text-center text-muted small">
-                <p class="mb-0">&copy; <?= date('Y') ?> <strong>Kosan Pak Iskandar</strong>. Made with <i class="fas fa-heart text-danger"></i> for Comfort Living.</p>
+
+            <div class="pt-4 mt-5 border-top border-secondary text-center text-light small">
+                <p class="mb-0">© <?= date('Y') ?> <strong>Kosan Pak Iskandar</strong>. Made with <i class="fas fa-heart text-danger"></i> for Comfort Living.</p>
             </div>
         </div>
     </footer>
-
     <!-- Bootstrap Bundle JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>

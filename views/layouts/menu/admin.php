@@ -52,6 +52,10 @@
         <div class="sb-nav-link-icon"><i class="fas fa-money-bill-wave"></i></div>
         Data Transaksi
     </a>
+    <a class="nav-link" href="<?= BASEURL ?>/review">
+        <div class="sb-nav-link-icon"><i class="fas fa-star"></i></div>
+        Data Ulasan
+    </a>
 
     <div class="sb-sidenav-menu-heading">Akun</div>
     <?php

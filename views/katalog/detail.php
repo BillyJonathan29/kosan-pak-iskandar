@@ -94,6 +94,41 @@
                     </div>
                 </div>
             </div>
+            <!-- Bagian Review -->
+            <div class="mb-5">
+                <h3 class="fw-800 mb-4 d-flex align-items-center">
+                    <i class="fas fa-comments text-info me-3"></i> Ulasan Penghuni (<?= count($reviews) ?>)
+                </h3>
+                
+                <?php if (empty($reviews)): ?>
+                    <div class="alert alert-light border rounded-4 p-4 text-center">
+                        <i class="far fa-frown text-muted mb-2 fs-3"></i>
+                        <p class="text-muted mb-0">Belum ada ulasan untuk kamar ini. Jadilah yang pertama memberikan ulasan!</p>
+                    </div>
+                <?php else: ?>
+                    <div class="review-list">
+                        <?php foreach ($reviews as $rev): ?>
+                            <div class="review-item bg-white p-4 rounded-4 shadow-sm mb-3 border-start border-info border-4">
+                                <div class="d-flex justify-content-between align-items-start mb-3">
+                                    <div class="d-flex align-items-center">
+                                        <img src="https://ui-avatars.com/api/?name=<?= urlencode($rev['user_name']) ?>&background=random" class="rounded-circle me-3" width="45" height="45">
+                                        <div>
+                                            <h6 class="mb-0 fw-bold"><?= htmlspecialchars($rev['user_name']) ?></h6>
+                                            <small class="text-muted"><?= date('d M Y', strtotime($rev['created_at'])) ?></small>
+                                        </div>
+                                    </div>
+                                    <div class="text-warning">
+                                        <?php for($i=1; $i<=5; $i++): ?>
+                                            <i class="<?= $i <= $rev['rating'] ? 'fas' : 'far'; ?> fa-star small"></i>
+                                        <?php endfor; ?>
+                                    </div>
+                                </div>
+                                <p class="mb-0 text-muted italic">"<?= htmlspecialchars($rev['comment']) ?>"</p>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                <?php endif; ?>
+            </div>
         </div>
 
         <!-- Bagian Kanan: Detail & Form Booking -->
@@ -109,7 +144,14 @@
                             <div class="text-end">
                                 <h6 class="text-uppercase text-muted fw-bold small mb-1 ls-1">Harga Sewa</h6>
                                 <h3 class="fw-800 text-success mb-0">Rp <?= number_format($room['price'], 0, ',', '.') ?></h3>
-                                <small class="text-muted">/ bulan</small>
+                                <div class="d-flex align-items-center justify-content-end mt-1 text-warning">
+                                    <?php 
+                                    $avg = round($avg_rating ?? 0);
+                                    for($i=1; $i<=5; $i++): ?>
+                                        <i class="<?= $i <= $avg ? 'fas' : 'far'; ?> fa-star small"></i>
+                                    <?php endfor; ?>
+                                    <span class="text-muted small ms-1">(<?= count($reviews) ?>)</span>
+                                </div>
                             </div>
                         </div>
 

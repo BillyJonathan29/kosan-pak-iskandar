@@ -2,6 +2,11 @@
 
 class RoomController extends Controller {
     
+    public function __construct()
+    {
+        $this->requireRole('admin');
+    }
+
     public function index() {
         $data = [
             'title' => 'Manajemen Kamar',

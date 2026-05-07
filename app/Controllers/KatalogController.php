@@ -1,17 +1,10 @@
 <?php
 
-class KatalogController extends Controller {
-
-    // ─── Guard: Hanya user yang login yang boleh akses ────────────────────────
-    private function requireLogin() {
-        if (!isset($_SESSION['user'])) {
-            header('Location: ' . BASEURL . '/auth');
-            exit;
-        }
-    }
-
+class KatalogController extends Controller
+{
     // ─── 1. Halaman Katalog Kamar ─────────────────────────────────────────────
-    public function index() {
+    public function index()
+    {
         // Halaman ini bisa diakses publik (landing page)
 
         $data = [
@@ -22,13 +15,16 @@ class KatalogController extends Controller {
             ],
             // Ambil semua kamar termasuk yang sudah dibooking/terisi
             'rooms' => $this->model('Katalog')->getAllRooms(),
+            // Ambil ulasan untuk ditampilkan di testimoni
+            'reviews' => $this->model('Review')->getAllReviews(),
         ];
 
         $this->view('katalog/index', $data);
     }
 
     // ─── 2. Halaman Detail Kamar ──────────────────────────────────────────────
-    public function detail($id) {
+    public function detail($id)
+    {
         // Detail kamar juga bisa diakses publik
 
         $room = $this->model('Katalog')->getRoomDetail($id);
@@ -48,13 +44,16 @@ class KatalogController extends Controller {
             ],
             'room'       => $room,
             'facilities' => $this->model('Katalog')->getRoomFacilities($id),
+            'reviews'    => $this->model('Review')->getReviewsByRoomId($id),
+            'avg_rating' => $this->model('Review')->getAverageRatingByRoomId($id),
         ];
 
         $this->view('katalog/detail', $data);
     }
 
     // ─── 3. Proses Booking ────────────────────────────────────────────────────
-    public function booking() {
+    public function booking()
+    {
         $this->requireLogin();
 
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -104,7 +103,8 @@ class KatalogController extends Controller {
     }
 
     // ─── 4. Riwayat Pesanan User ──────────────────────────────────────────────
-    public function riwayat() {
+    public function riwayat()
+    {
         $this->requireLogin();
 
         $user_id = $_SESSION['user']['id'];

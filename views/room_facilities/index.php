@@ -18,38 +18,31 @@
                         <th>No</th>
                         <th>Kos</th>
                         <th>No. Kamar</th>
-                        <th>Icon</th>
                         <th>Fasilitas</th>
                         <th>Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <?php $no = 1; foreach ($room_facilities as $rf) : ?>
-                    <tr>
-                        <td><?= $no++; ?></td>
-                        <td><?= htmlspecialchars($rf['kos_name']); ?></td>
-                        <td><?= htmlspecialchars($rf['room_number']); ?></td>
-                        <td class="text-center">
-                            <?php if (!empty($rf['icon'])): ?>
-                                <i class="<?= htmlspecialchars($rf['icon']); ?> fa-lg"></i>
-                            <?php else: ?>
-                                <span class="text-muted">—</span>
-                            <?php endif; ?>
-                        </td>
-                        <td><?= htmlspecialchars($rf['facility_name']); ?></td>
-                        <td>
-                            <button type="button" class="btn btn-warning btn-sm tampilModalUbah"
-                                data-bs-toggle="modal" data-bs-target="#formModal"
-                                data-id="<?= $rf['id']; ?>">
-                                <i class="fas fa-edit"></i> Edit
-                            </button>
-                            <button type="button" class="btn btn-danger btn-sm tombolHapus"
-                                data-bs-toggle="modal" data-bs-target="#deleteModal"
-                                data-id="<?= $rf['id']; ?>">
-                                <i class="fas fa-trash"></i> Hapus
-                            </button>
-                        </td>
-                    </tr>
+                    <?php $no = 1;
+                    foreach ($room_facilities as $rf) : ?>
+                        <tr>
+                            <td><?= $no++; ?></td>
+                            <td><?= htmlspecialchars($rf['kos_name']); ?></td>
+                            <td><?= htmlspecialchars($rf['room_number']); ?></td>
+                            <td><?= htmlspecialchars($rf['facility_name']); ?></td>
+                            <td>
+                                <button type="button" class="btn btn-warning btn-sm tampilModalUbah"
+                                    data-bs-toggle="modal" data-bs-target="#formModal"
+                                    data-id="<?= $rf['id']; ?>">
+                                    <i class="fas fa-edit"></i> Edit
+                                </button>
+                                <button type="button" class="btn btn-danger btn-sm tombolHapus"
+                                    data-bs-toggle="modal" data-bs-target="#deleteModal"
+                                    data-id="<?= $rf['id']; ?>">
+                                    <i class="fas fa-trash"></i> Hapus
+                                </button>
+                            </td>
+                        </tr>
                     <?php endforeach; ?>
                 </tbody>
             </table>
@@ -86,16 +79,19 @@ ob_start();
                         </select>
                     </div>
                     <div class="mb-3">
-                        <label for="facility_id" class="form-label">Fasilitas</label>
-                        <select class="form-select" id="facility_id" name="facility_id" required>
-                            <option value="">-- Pilih Fasilitas --</option>
-                            <?php foreach ($facilities as $f) : ?>
-                                <option value="<?= $f['id']; ?>">
-                                    <?= !empty($f['icon']) ? '[' . htmlspecialchars($f['icon']) . '] ' : ''; ?>
-                                    <?= htmlspecialchars($f['facility_name']); ?>
-                                </option>
-                            <?php endforeach; ?>
-                        </select>
+                        <label class="form-label">Fasilitas</label>
+                        <div id="facilityContainer">
+                            <div class="input-group mb-2 facility-row">
+                                <select class="form-select facility-select" name="facility_id[]" required>
+                                    <option value="">-- Pilih Fasilitas --</option>
+                                    <?php foreach ($facilities as $f) : ?>
+                                        <option value="<?= $f['id']; ?>"><?= !empty($f['icon']) ? '[' . htmlspecialchars($f['icon']) . '] ' : ''; ?><?= htmlspecialchars($f['facility_name']); ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                                <button type="button" class="btn btn-outline-secondary btn-remove-facility" title="Hapus" style="display:none;">&times;</button>
+                            </div>
+                        </div>
+                        <div class="form-text">Pilih satu fasilitas per baris; baris baru akan ditambahkan otomatis setelah Anda memilih.</div>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -141,6 +137,43 @@ ob_start();
             new simpleDatatables.DataTable(datatablesSimple);
         }
 
+        // facility options rendered from server
+        <?php
+        $opts = '';
+        foreach ($facilities as $f) {
+            $label = (!empty($f['icon']) ? '[' . $f['icon'] . '] ' : '') . $f['facility_name'];
+            $opts .= '<option value="' . $f['id'] . '">' . htmlspecialchars($label) . '</option>';
+        }
+        ?>
+        const facilityOptionsHtml = <?= json_encode($opts); ?>;
+
+        // Helper to create a facility row
+        function createFacilityRow(selectedValue = '', showRemove = false) {
+            const removeBtnStyle = showRemove ? '' : 'style="display:none;"';
+            const html = `
+                <div class="input-group mb-2 facility-row">
+                    <select class="form-select facility-select" name="facility_id[]" required>
+                        <option value="">-- Pilih Fasilitas --</option>
+                        ${facilityOptionsHtml}
+                    </select>
+                    <button type="button" class="btn btn-outline-secondary btn-remove-facility" title="Hapus" ${removeBtnStyle}>&times;</button>
+                </div>`;
+            const $row = $(html);
+            if (selectedValue) {
+                $row.find('select').val(selectedValue);
+            }
+            return $row;
+        }
+
+        function updateRemoveButtons() {
+            const rows = $('#facilityContainer .facility-row');
+            if (rows.length <= 1) {
+                rows.find('.btn-remove-facility').hide();
+            } else {
+                rows.find('.btn-remove-facility').show();
+            }
+        }
+
         // Tambah Data
         $('.tombolTambahData').on('click', function() {
             $('#formModalLabel').html('Tambah Fasilitas Kamar');
@@ -148,7 +181,9 @@ ob_start();
             $('.modal-content form').attr('action', '<?= BASEURL; ?>/roomfacility/store');
             $('#id').val('');
             $('#room_id').val('');
-            $('#facility_id').val('');
+            // reset facility rows to single empty select
+            $('#facilityContainer').empty().append(createFacilityRow('', false));
+            updateRemoveButtons();
         });
 
         // Ubah Data
@@ -167,16 +202,58 @@ ob_start();
                 success: function(data) {
                     $('#id').val(data.id);
                     $('#room_id').val(data.room_id);
-                    $('#facility_id').val(data.facility_id);
+                    
+                    $('#facilityContainer').empty();
+                    
+                    let vals = [];
+                    if (data.facility_id) {
+                        if (Array.isArray(data.facility_id)) {
+                            vals = data.facility_id;
+                        } else if (typeof data.facility_id === 'string' && data.facility_id.includes(',')) {
+                            vals = data.facility_id.split(',').map(v => v.trim());
+                        } else {
+                            vals = [data.facility_id];
+                        }
+                    }
+
+                    if (vals.length === 0) {
+                        $('#facilityContainer').append(createFacilityRow('', false));
+                    } else {
+                        vals.forEach((v, idx) => {
+                            $('#facilityContainer').append(createFacilityRow(v, idx > 0));
+                        });
+                    }
+                    updateRemoveButtons();
                 }
             });
         });
 
         // Hapus Data
-        $('.tombolHapus').on('click', function() {
+        $(document).on('click', '.tombolHapus', function() {
             const id = $(this).data('id');
             $('#btn-confirm-delete').attr('href', '<?= BASEURL; ?>/roomfacility/delete/' + id);
         });
+
+        // Automatically add a new row when last select gets a non-empty value
+        $('#facilityContainer').on('change', '.facility-select', function() {
+            const $all = $('#facilityContainer .facility-select');
+            const $last = $all.last();
+            
+            if ($(this).val() !== '' && $(this)[0] === $last[0]) {
+                // append a fresh empty row
+                $('#facilityContainer').append(createFacilityRow('', true));
+                updateRemoveButtons();
+            }
+        });
+
+        // Delegate remove button click
+        $('#facilityContainer').on('click', '.btn-remove-facility', function() {
+            $(this).closest('.facility-row').remove();
+            updateRemoveButtons();
+        });
+
+        // initial state
+        updateRemoveButtons();
     });
 </script>
 <?php

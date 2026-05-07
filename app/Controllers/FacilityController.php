@@ -1,6 +1,10 @@
 <?php
 
 class FacilityController extends Controller {
+    public function __construct()
+    {
+        $this->requireRole('admin');
+    }
 
     public function index() {
         $data = [

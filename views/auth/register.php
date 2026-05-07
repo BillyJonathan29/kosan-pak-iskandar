@@ -228,11 +228,46 @@
             .auth-form-container {
                 padding: 2rem;
             }
+
+            .back-home {
+                top: 1rem;
+                left: 1rem;
+                padding: 0.5rem 1rem;
+                font-size: 0.85rem;
+            }
+        }
+
+        .back-home {
+            position: fixed;
+            top: 2rem;
+            left: 2rem;
+            z-index: 100;
+            text-decoration: none;
+            color: var(--dark-color);
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.25rem;
+            background: white;
+            border-radius: 50px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+        }
+
+        .back-home:hover {
+            transform: translateX(-5px);
+            color: var(--primary-color);
+            box-shadow: 0 15px 35px rgba(67, 97, 238, 0.1);
         }
     </style>
 </head>
 
 <body>
+
+    <a href="<?= BASEURL ?>" class="back-home animate__animated animate__fadeInLeft">
+        <i class="fas fa-arrow-left"></i> Kembali ke Beranda
+    </a>
 
     <div class="auth-wrapper">
         <div class="auth-card animate__animated animate__zoomIn">

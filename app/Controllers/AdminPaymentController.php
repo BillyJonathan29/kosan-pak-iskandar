@@ -1,26 +1,9 @@
 <?php
 
 class AdminPaymentController extends Controller {
-
-    /**
-     * Guard: pastikan user sudah login dan memiliki role 'admin'.
-     * Dipanggil di setiap method yang memerlukan proteksi.
-     */
-    private function requireAdmin() {
-        if (!isset($_SESSION['user'])) {
-            header('Location: ' . BASEURL . '/auth');
-            exit;
-        }
-
-        if ($_SESSION['user']['role'] !== 'admin') {
-            // Penyewa biasa tidak boleh mengakses halaman ini
-            $_SESSION['flash'] = [
-                'pesan' => 'Anda tidak memiliki akses ke halaman tersebut.',
-                'tipe'  => 'danger'
-            ];
-            header('Location: ' . BASEURL . '/katalog');
-            exit;
-        }
+    public function __construct()
+    {
+        $this->requireRole('admin');
     }
 
     /**
@@ -29,8 +12,6 @@ class AdminPaymentController extends Controller {
      * Route: GET /adminpayment   (atau sesuai routing yang dipakai)
      */
     public function index() {
-        $this->requireAdmin();
-
         $paymentModel = $this->model('Payment');
         $payments     = $paymentModel->getAllPayments();
 
@@ -52,8 +33,6 @@ class AdminPaymentController extends Controller {
      * Route: GET /adminpayment/detail/{id}
      */
     public function detail($id) {
-        $this->requireAdmin();
-
         $paymentModel = $this->model('Payment');
         $payment      = $paymentModel->getPaymentById($id);
 

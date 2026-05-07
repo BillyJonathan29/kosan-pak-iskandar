@@ -6,6 +6,7 @@ use Midtrans\Transaction;
 class TransactionController extends Controller {
 
     public function __construct() {
+        $this->requireRole('admin');
         // Set Midtrans configuration
         Config::$serverKey = MIDTRANS_SERVER_KEY;
         Config::$isProduction = MIDTRANS_IS_PRODUCTION;
@@ -14,31 +15,10 @@ class TransactionController extends Controller {
     }
 
     /**
-     * Guard: pastikan user sudah login dan memiliki role 'admin'.
-     */
-    private function requireAdmin() {
-        if (!isset($_SESSION['user'])) {
-            header('Location: ' . BASEURL . '/auth');
-            exit;
-        }
-
-        if ($_SESSION['user']['role'] !== 'admin') {
-            $_SESSION['flash'] = [
-                'pesan' => 'Anda tidak memiliki akses ke halaman tersebut.',
-                'tipe'  => 'danger'
-            ];
-            header('Location: ' . BASEURL . '/katalog');
-            exit;
-        }
-    }
-
-    /**
      * Menampilkan daftar seluruh transaksi pembayaran (Admin only).
      * Route: GET /transaction
      */
     public function index() {
-        $this->requireAdmin();
-
         $paymentModel = $this->model('Payment');
         $payments     = $paymentModel->getAllPayments();
 
@@ -59,8 +39,6 @@ class TransactionController extends Controller {
      * Route: GET /transaction/detail/{id}
      */
     public function detail($id) {
-        $this->requireAdmin();
-
         $paymentModel = $this->model('Payment');
         $payment      = $paymentModel->getPaymentById($id);
 
@@ -90,8 +68,6 @@ class TransactionController extends Controller {
      * Mengecek status transaksi langsung ke API Midtrans (Manual Sync)
      */
     public function checkStatus($id) {
-        $this->requireAdmin();
-
         $paymentModel = $this->model('Payment');
         $payment = $paymentModel->getPaymentById($id);
 

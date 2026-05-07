@@ -20,6 +20,7 @@ class Booking
                          u.email AS user_email,
                          u.phone AS user_phone,
                          r.room_number,
+                         r.image AS room_image,
                          k.name  AS kos_name
                   FROM bookings b
                   JOIN users u ON b.user_id = u.id
@@ -37,6 +38,7 @@ class Booking
                          u.email AS user_email,
                          u.phone AS user_phone,
                          r.room_number,
+                         r.image AS room_image,
                          k.name  AS kos_name
                   FROM bookings b
                   JOIN users u ON b.user_id = u.id

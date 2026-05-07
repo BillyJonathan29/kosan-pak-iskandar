@@ -1,22 +1,19 @@
 <?php
 
-class HomeController extends Controller {
+class HomeController extends Controller
+{
+    public function __construct()
+    {
+        $this->requireRole('admin');
+    }
 
-    public function index() {
-        if (!isset($_SESSION['user'])) {
-            header('Location: ' . BASEURL . '/auth');
-            exit;
-        }
-
-        if ($_SESSION['user']['role'] !== 'admin') {
-            header('Location: ' . BASEURL . '/katalog');
-            exit;
-        }
-
+    public function index()
+    {
         $roomModel     = $this->model('Room');
         $kosModel      = $this->model('Kos');
         $facilityModel = $this->model('Facility');
         $bookingModel  = $this->model('Booking');
+        $paymentModel  = $this->model('Payment');
 
         $data = [
             'title'       => 'Dashboard Kosan',
@@ -35,10 +32,13 @@ class HomeController extends Controller {
             // Booking stats
             'total_booking'    => $bookingModel->countBookings(),
             'booking_pending'  => $bookingModel->countByStatus('pending'),
-            'booking_confirmed'=> $bookingModel->countByStatus('confirmed'),
+            'booking_confirmed' => $bookingModel->countByStatus('confirmed'),
 
             // Tabel kamar terbaru
             'recent_rooms'     => $roomModel->getRecentRooms(5),
+            // Finance
+            'revenue_this_month' => $paymentModel->getMonthlyRevenue(date('Y'), date('n')),
+            'pending_bills_total' => $paymentModel->getPendingTotal(),
         ];
 
         $this->view('dashboard/dashboard', $data);

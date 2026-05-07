@@ -125,6 +125,34 @@
         </div>
     </div>
 
+    <!-- Finance Quick Stats -->
+    <div class="row g-3 mb-4">
+        <div class="col-lg-6 col-md-6">
+            <div class="card-ghost p-3 stat-card h-100 d-flex gap-3 align-items-center">
+                <div class="stat-icon bg-gradient-primary text-white" style="background:linear-gradient(135deg,#06b6d4,#4f46e5);">
+                    <i class="fas fa-wallet"></i>
+                </div>
+                <div>
+                    <div class="stat-title">Pendapatan Bulan Ini</div>
+                    <div class="stat-value">Rp <?= number_format($revenue_this_month ?? 0, 0, ',', '.') ?></div>
+                    <div class="muted small">Total dari transaksi berstatus paid (<?= date('F Y') ?>)</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6 col-md-6">
+            <div class="card-ghost p-3 stat-card h-100 d-flex gap-3 align-items-center">
+                <div class="stat-icon bg-gradient-danger text-white" style="background:linear-gradient(135deg,#ef4444,#f97316);">
+                    <i class="fas fa-file-invoice-dollar"></i>
+                </div>
+                <div>
+                    <div class="stat-title">Tagihan Tertunda</div>
+                    <div class="stat-value">Rp <?= number_format($pending_bills_total ?? 0, 0, ',', '.') ?></div>
+                    <div class="muted small">Total nominal transaksi dengan status pending / unpaid</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Occupancy Rate -->
     <div class="row mb-4">
         <div class="col-lg-7">

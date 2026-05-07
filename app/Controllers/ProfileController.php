@@ -2,13 +2,6 @@
 
 class ProfileController extends Controller {
     
-    private function requireLogin() {
-        if (!isset($_SESSION['user'])) {
-            header('Location: ' . BASEURL . '/auth');
-            exit;
-        }
-    }
-
     public function index() {
         $this->requireLogin();
 
